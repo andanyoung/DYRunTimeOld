@@ -1,0 +1,33 @@
+//
+//  DYRunTime.pch
+//  DYRunTime
+//
+//  Created by tarena on 15/10/11.
+//  Copyright (c) 2015年 ady. All rights reserved.
+//
+
+//#ifndef DYRunTime_DYRunTime_pch
+//#define DYRunTime_DYRunTime_pch
+//
+//// Include any system framework and library headers here that should be included in all compilation units.
+//// You will also need to set the Prefix Header build setting of one or more of your targets to reference this file.
+//
+//#endif
+
+// 自定义Log
+
+#define DEBUG 1
+#ifdef DEBUG
+
+#define WCLog(...) NSLog(@"%s %d \n %@\n\n",__func__,__LINE__,[NSString stringWithFormat:__VA_ARGS__])
+#define WDLog(...) NSLog(@"%s %d \n %ld\n\n",__func__,__LINE__,__VA_ARGS__)
+#define WFLog(...) NSLog(@"%s %d \n %lf\n\n",__func__,__LINE__,__VA_ARGS__)
+#define WALog(...) NSLog(@"%s %d \n %@\n\n",__func__,__LINE__,__VA_ARGS__)
+
+#else
+#define WCLog(...)
+#define WDLog(...)
+#define WFLog(...)
+#define WALog(...)
+
+#endif
