@@ -7,32 +7,27 @@
 //
 
 #import "DYMainViewController.h"
-#import <Masonry.h>
+#import "DYRecordView.h"
 
 @interface DYMainViewController ()
 @property (nonatomic,strong) UILabel *distanceLB;
 @property (nonatomic,strong) UILabel *timeLB;
+@property (nonatomic,strong) DYRecordView *tableHeaderView;
 @end
 
 @implementation DYMainViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
-    
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
-    
-    UIView *tableHeaderView = [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 300)];
-    self.tableView.tableHeaderView = tableHeaderView;
+
+    _tableHeaderView = [[DYRecordView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 250)];
+    [_tableHeaderView setBackgroundColor:[UIColor colorWithRed:0.97 green:0.97 blue:0.97 alpha:0.79]];
+    self.tableView.tableHeaderView = _tableHeaderView;
     self.distanceLB = [[UILabel alloc]init];
-    self.distanceLB.text = @"00.00";
     self.distanceLB.font = [UIFont fontWithName:@"AmericanTypewriter-Bold" size:40];
-    [tableHeaderView addSubview:self.distanceLB];
+    [_tableHeaderView addSubview:self.distanceLB];
     
-    
+    self.title = @"RunTime";
 }
 
 - (void)didReceiveMemoryWarning {
@@ -56,34 +51,7 @@
     return [NSString stringWithFormat:@"%ld",section];
 }
 
-- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
-    UIView *headView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 30)];
-    headView.backgroundColor = [UIColor redColor];
-    
-    UILabel *nameLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width / 3, 30)];
-    nameLabel.text = @"名称代码";
-    nameLabel.textAlignment = NSTextAlignmentCenter;
-    nameLabel.textColor = [UIColor whiteColor];
-    nameLabel.font = [UIFont boldSystemFontOfSize:15.0];
-    
-    UILabel *priceLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width / 3, 0, self.view.frame.size.width / 3, 30)];
-    priceLabel.text = @"最新价";
-    priceLabel.textAlignment = NSTextAlignmentCenter;
-    priceLabel.textColor = [UIColor whiteColor];
-    priceLabel.font = [UIFont boldSystemFontOfSize:15.0];
-    
-    UILabel *precentLabel = [[UILabel alloc] initWithFrame:CGRectMake(self.view.frame.size.width / 3 * 2, 0, self.view.frame.size.width / 3, 30)];
-    precentLabel.text = @"aaa";
-    precentLabel.textAlignment = NSTextAlignmentCenter;
-    precentLabel.textColor = [UIColor whiteColor];
-    precentLabel.font = [UIFont boldSystemFontOfSize:15.0];
-    
-    [headView addSubview:nameLabel];
-    [headView addSubview:priceLabel];
-    [headView addSubview:precentLabel];
-    
-    return headView;
-}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
     

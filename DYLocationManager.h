@@ -22,7 +22,7 @@
  *  用于保存总表
  */
 @property (nonatomic,strong) NSMutableArray *locations;
-@property (nonatomic, strong) BMKLocationService *locationService;
+//@property (nonatomic, strong) BMKLocationService *locationService;
 @property (nonatomic, strong)id<DYLocationManagerDelegate> delegate;
 @property (nonatomic) NSInteger timerNumber;
 @property (nonatomic) double totalDistanc;
@@ -32,4 +32,6 @@
  * 开始定位
  */
 - (void)startUpdatingLocation;
+
+- (void)stopUpdatingLocation;
 @end

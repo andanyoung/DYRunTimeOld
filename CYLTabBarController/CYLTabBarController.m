@@ -10,7 +10,9 @@
 
 #import "CYLTabBar.h"
 #import <objc/runtime.h>
-#import "MapViewController.h"
+
+#import "DYLocationManager.h"
+
 NSUInteger CYLTabbarItemsCount = 0;
 
 @interface UIViewController (CYLTabBarControllerItemInternal)
@@ -25,7 +27,6 @@ NSUInteger CYLTabbarItemsCount = 0;
 @implementation CYLTabBarController
 @synthesize viewControllers = _viewControllers;
 
-#pragma mark -
 #pragma mark - Life Cycle
 
 -(void)viewDidLoad{
@@ -39,11 +40,7 @@ NSUInteger CYLTabbarItemsCount = 0;
     [CYLExternPushlishButton addTarget:self action:@selector(clickPublish) forControlEvents:UIControlEventTouchUpInside];
 }
 
-- (void)clickPublish{
-   // MapViewController *mapVc = [MapViewController new];
-    
-    NSLog(@"clickPublish");
-}
+
 
 
 #pragma mark - Private Methods
@@ -177,6 +174,11 @@ NSUInteger CYLTabbarItemsCount = 0;
 }
 
 
-
+- (void)clickPublish{
+    // MapViewController *mapVc = [MapViewController new];
+    
+    DYLocationManager *locationManage = [DYLocationManager shareLocationManager];
+    
+}
 
 @end

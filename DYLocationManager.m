@@ -12,6 +12,8 @@
 #import <UIKit/UIKit.h>
 #import <BaiduMapAPI_Location/BMKLocationComponent.h>//引入定位功能所有的头文件
 
+
+static BMKLocationService *locationService;
 @interface DYLocationManager ()<BMKLocationServiceDelegate>
 {
     NSTimer *_timer;
@@ -25,18 +27,23 @@
     }
     return _locations;
 }
+
+
 +(DYLocationManager *)shareLocationManager{
-    //单例
+//    //单例
     static DYLocationManager *manager = nil;
     static dispatch_once_t oneToke;
     dispatch_once(&oneToke, ^{
         manager = [DYLocationManager new];
-        manager.locationService = [BMKLocationService new];
-        manager.locationService.delegate = manager;
     });
-    
+#warning 先试着用全局变量保存，看是不是可以在后台一值运行
+    if (locationService == nil) {
+        locationService = [BMKLocationService new];
+        locationService.delegate = manager;
+    }
     return manager;
 }
+
 
 //处理位置坐标更新
 - (void)didUpdateBMKUserLocation:(BMKUserLocation *)userLocation  {
