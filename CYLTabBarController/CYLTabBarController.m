@@ -178,6 +178,7 @@ NSUInteger CYLTabbarItemsCount = 0;
     // MapViewController *mapVc = [MapViewController new];
     
     DYLocationManager *locationManage = [DYLocationManager shareLocationManager];
+    [locationManage startUpdatingLocation];
     
 }
 

@@ -18,14 +18,16 @@
 
 @end
 @interface DYLocationManager : NSObject
-/**
- *  用于保存总表
- */
+
 @property (nonatomic,strong) NSMutableArray *locations;
 //@property (nonatomic, strong) BMKLocationService *locationService;
 @property (nonatomic, strong)id<DYLocationManagerDelegate> delegate;
+
+/*  用于保存总表
+ */
 @property (nonatomic) NSInteger timerNumber;
 @property (nonatomic) double totalDistanc;
+@property (nonatomic,weak) NSDate *timestamp;
 
 + (DYLocationManager *)shareLocationManager;
 /**
@@ -33,5 +35,8 @@
  */
 - (void)startUpdatingLocation;
 
+/**
+ * 结束定位
+ */
 - (void)stopUpdatingLocation;
 @end

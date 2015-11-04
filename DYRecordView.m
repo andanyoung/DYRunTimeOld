@@ -9,10 +9,10 @@
 #import "DYRecordView.h"
 #import <Masonry.h>
 
+static NSTimer *_timer;
+static NSInteger _timerNumber;
 @interface DYRecordView ()
-@property (nonatomic,strong) UILabel *distanceLB;
-@property (nonatomic,strong) UILabel *timeLB;
-@property (nonatomic,strong) UILabel *speedLB;
+
 @end
 
 @implementation DYRecordView
@@ -21,7 +21,7 @@
     if (self = [super initWithFrame:frame]) {
         
         _distanceLB = [[UILabel alloc]init];
-        _distanceLB.text = @"00.00";
+        _distanceLB.text = @"0.00";
         _distanceLB.font =  [UIFont fontWithName:@"AmericanTypewriter-Bold" size:80];
         _distanceLB.textAlignment = NSTextAlignmentCenter;
         //文本文字自适应大小
@@ -38,7 +38,7 @@
         [self addSubview:unitLabel];
         [unitLabel mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(_distanceLB.mas_bottom).mas_equalTo(2);
-            make.right.mas_equalTo(_distanceLB.mas_right);
+            make.centerX.mas_equalTo(0);
         }];
         
         UIView *containerView = [UIView new];
@@ -106,11 +106,20 @@
     return self;
 }
 
-- (void)setDistance:(NSInteger)distance{
-    _distance = distance;
-    _distanceLB.text = [NSString stringWithFormat:@"%4ld",_distance];
-    
-   
+- (void)startTimer{
+    _timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(chanageTimeValue) userInfo:nil repeats:YES];
+    // [[NSDate alloc]timeIntervalSinceDate: (NSDate *)userInfo.userInfo[@"timestamp"]];
+   // NSLog(@"%ld",_timerNumber);
 }
 
+- (void)stopTimer{
+    [_timer invalidate];
+    _timer = nil;
+    _timerNumber = 0;
+}
+
+- (void)chanageTimeValue{
+    _timerNumber++;
+    _timeLB.text = [NSString stringWithFormat:@"%.2ld:%.2ld", _timerNumber/60 ,_timerNumber%60];
+}
 @end
