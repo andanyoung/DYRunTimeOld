@@ -39,7 +39,9 @@
         self.plusButton = CYLExternPushlishButton;
         [self addSubview:(UIButton *)self.plusButton];
     }
-    [self setBackgroundImage:[self imageWithColor:[UIColor whiteColor]]];
+    //tabbar 背景色
+   // [self setBackgroundImage:[self imageWithColor:[UIColor colorWithHue:0.97 saturation:0.97 brightness:0.97 alpha:0.79]]];
+    [self setBackgroundImage:[UIImage imageNamed:@"line"]];
     return self;
 }
 

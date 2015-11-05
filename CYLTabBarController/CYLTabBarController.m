@@ -11,7 +11,7 @@
 #import "CYLTabBar.h"
 #import <objc/runtime.h>
 
-#import "DYLocationManager.h"
+
 
 NSUInteger CYLTabbarItemsCount = 0;
 
@@ -36,8 +36,6 @@ NSUInteger CYLTabbarItemsCount = 0;
     // 处理tabBar，使用自定义 tabBar 添加 发布按钮
     [self setUpTabBar];
     [[UITabBar appearance] setBackgroundImage:[self imageWithColor:[UIColor whiteColor]]];
-    
-    [CYLExternPushlishButton addTarget:self action:@selector(clickPublish) forControlEvents:UIControlEventTouchUpInside];
 }
 
 
@@ -174,12 +172,6 @@ NSUInteger CYLTabbarItemsCount = 0;
 }
 
 
-- (void)clickPublish{
-    // MapViewController *mapVc = [MapViewController new];
-    
-    DYLocationManager *locationManage = [DYLocationManager shareLocationManager];
-    [locationManage startUpdatingLocation];
-    
-}
+
 
 @end

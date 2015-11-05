@@ -27,7 +27,6 @@
 
 //百度地图View
 @property (weak, nonatomic) IBOutlet BMKMapView *mapView;
-@property (strong, nonatomic)NSMutableArray *locations;
 @property (nonatomic, strong) BMKPolyline *polyLine;
 @property (nonatomic, strong) DYLocationManager *locationManager;
 
@@ -46,9 +45,9 @@
     //初始化定位
     [self initLocation];
     
-//    if (_locations.count>1) {
-//        [self drawWalkPolyline:];
-//    }
+    if (_locations.count>1) {
+        [self drawWalkPolyline:_locations];
+    }
     
 }
 
@@ -57,7 +56,6 @@
     [super viewDidAppear:animated];
     _mapView.delegate = self;
     
-    
     [self startLocation];
     [_mapView viewWillAppear];
 }
@@ -65,7 +63,6 @@
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     _mapView.delegate = nil;//不用时，值nil。释放内存
-    //_locaService.delegate = nil;  //后台定位不能为nil 要去数组中添加数组
 }
 
 #pragma mark -- 初始化定位
@@ -127,7 +124,7 @@
     NSUInteger count = locations.count;
     // 动态分配存储空间
     // BMKMapPoint是个结构体：地理坐标点，用直角地理坐标表示 X：横坐标 Y：纵坐标
-    BMKMapPoint *tempPoints = malloc(sizeof(CLLocationCoordinate2D) * count);
+    BMKMapPoint *tempPoints = malloc(sizeof(BMKMapPoint) * count);
     // 遍历数组 ,将coordinate 转化为 BMKMapPoint
     [locations enumerateObjectsUsingBlock:^(CLLocation *location, NSUInteger idx, BOOL * _Nonnull stop) {
         BMKMapPoint locationPoint = BMKMapPointForCoordinate(location.coordinate);
@@ -219,7 +216,12 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"内存警告" message:@"😢😢😢😢😢😢" delegate:self cancelButtonTitle:@"cancle" otherButtonTitles: nil];
-    [alert show];
+//    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"内存警告" message:@"😢😢😢😢😢😢" delegate:self cancelButtonTitle:@"cancle" otherButtonTitles: nil];
+//    [alert show];
+}
+
+
+- (IBAction)quitMap:(id)sender {
+    [self dismissModalViewControllerAnimated:YES];
 }
 @end

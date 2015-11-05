@@ -7,7 +7,8 @@
 //
 
 #import "CYLPlusButtonSubclass.h"
-
+#import "DYLocationManager.h"
+#import "AppDelegate.h"
 
 @interface CYLPlusButtonSubclass () {
   //  CGFloat _buttonImageHeight;
@@ -39,7 +40,7 @@
     [super layoutSubviews];
     
     // 控件大小,间距大小
-    CGFloat const imageViewEdge   = self.bounds.size.width * 0.8;
+    CGFloat const imageViewEdge   = self.bounds.size.width * 0.6;
     CGFloat const centerOfView    = self.bounds.size.width * 0.5;
     CGFloat const labelLineHeight = self.titleLabel.font.lineHeight;
     CGFloat const verticalMarginT = self.bounds.size.height - labelLineHeight - imageViewEdge;
@@ -89,8 +90,8 @@
 + (instancetype)plusButton
 {
     
-    UIImage *buttonImage = [UIImage imageNamed:@"hood.png"];
-    UIImage *highlightImage = [UIImage imageNamed:@"hood-selected.png"];
+    UIImage *buttonImage = [UIImage imageNamed:@"activities_icon_running_tab.png"];
+    UIImage *highlightImage = [UIImage imageNamed:@"activities_icon_running_tab.png"];
     
     CYLPlusButtonSubclass* button = [CYLPlusButtonSubclass buttonWithType:UIButtonTypeCustom];
     
@@ -106,9 +107,21 @@
 #pragma mark -
 #pragma mark - Event Response
 
-- (void)clickPublish {
-   // MapViewController *mapVC = [MapViewController new];
-    NSLog(@"vvv");
+- (void)clickPublish{
+    // MapViewController *mapVc = [MapViewController new];
+    UITabBarController *tabBarController = ( (AppDelegate *)[UIApplication sharedApplication].delegate).tabBarController;
+    
+    tabBarController.selectedIndex = 0;
+    DYLocationManager *locationManage = [DYLocationManager shareLocationManager];
+    
+    if (locationManage.running) {
+        [locationManage stopUpdatingLocation];
+    }else{
+        [locationManage startUpdatingLocation];
+    }
+    
+    
+   
 }
 
 

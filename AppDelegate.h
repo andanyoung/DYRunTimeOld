@@ -7,12 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
-@class DYLocationManager;
+@class DYLocationManager,CYLTabBarController;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (strong, nonatomic) DYLocationManager *locationManager;
-
+@property (strong, nonatomic) CYLTabBarController *tabBarController;
 @end
 

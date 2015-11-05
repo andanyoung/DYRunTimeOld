@@ -21,10 +21,10 @@
 BMKMapManager* _mapManager;
 
 @interface AppDelegate ()
-{
-    UIBackgroundTaskIdentifier bgtask;
-}
-@property (strong, nonatomic) CYLTabBarController *tabBarController;
+//{
+//    UIBackgroundTaskIdentifier bgtask;
+//}
+
 @end
 
 @implementation AppDelegate
@@ -64,6 +64,8 @@ BMKMapManager* _mapManager;
     //    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
     //         _locationManager.locationService.allowsBackgroundLocationUpdates = YES;
     //    }
+    
+    
     return YES;
 }
 
@@ -74,9 +76,8 @@ BMKMapManager* _mapManager;
     DYMainViewController *mianViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"main"];
     UINavigationController *firstNavigationController = [[UINavigationController alloc]initWithRootViewController:mianViewController];
     
-    DYNewsViewController *newsViewController = [DYNewsViewController new];
-    UIViewController *secondNavigationController = [[UINavigationController alloc]
-                                                    initWithRootViewController:newsViewController];
+    DYNewsViewController *newsViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"news"];
+    UIViewController *secondNavigationController = [[UINavigationController alloc]initWithRootViewController:newsViewController];
     
     
     CYLTabBarController *tabBarController = [CYLTabBarController new];
@@ -105,16 +106,16 @@ BMKMapManager* _mapManager;
                             CYLTabBarItemImage : @"home_normal",
                             CYLTabBarItemSelectedImage : @"home_highlight",
                             };
-    NSDictionary *dict2 = @{
-                            CYLTabBarItemTitle : @"同城",
-                            CYLTabBarItemImage : @"mycity_normal",
-                            CYLTabBarItemSelectedImage : @"mycity_highlight",
-                            };
-    NSDictionary *dict3 = @{
-                            CYLTabBarItemTitle : @"消息",
-                            CYLTabBarItemImage : @"message_normal",
-                            CYLTabBarItemSelectedImage : @"message_highlight",
-                            };
+//    NSDictionary *dict2 = @{
+//                            CYLTabBarItemTitle : @"同城",
+//                            CYLTabBarItemImage : @"mycity_normal",
+//                            CYLTabBarItemSelectedImage : @"mycity_highlight",
+//                            };
+//    NSDictionary *dict3 = @{
+//                            CYLTabBarItemTitle : @"消息",
+//                            CYLTabBarItemImage : @"message_normal",
+//                            CYLTabBarItemSelectedImage : @"message_highlight",
+//                            };
     NSDictionary *dict4 = @{
                             CYLTabBarItemTitle : @"我的",
                             CYLTabBarItemImage : @"account_normal",
@@ -205,14 +206,14 @@ BMKMapManager* _mapManager;
      *  4.后台运行状态
      */
     // 向操作系统申请后台运行的资格，能维持多久，是不确定的
-     bgtask = [application beginBackgroundTaskWithExpirationHandler:^{
-        // 当申请的后台运行时间已经结束（过期），就会调用这个block
-        
-        // 赶紧结束任务
-        [application endBackgroundTask:bgtask];
-        bgtask = UIBackgroundTaskInvalid;
-    }];
-    
+//     bgtask = [application beginBackgroundTaskWithExpirationHandler:^{
+//        // 当申请的后台运行时间已经结束（过期），就会调用这个block
+//        
+//        // 赶紧结束任务
+//        [application endBackgroundTask:bgtask];
+//        bgtask = UIBackgroundTaskInvalid;
+//    }];
+//    
     // 在Info.plst中设置后台模式：Required background modes == App plays audio or streams audio/video using AirPlay
     // 搞一个0kb的MP3文件，没有声音
     // 循环播放

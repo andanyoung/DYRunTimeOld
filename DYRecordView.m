@@ -21,14 +21,16 @@ static NSInteger _timerNumber;
     if (self = [super initWithFrame:frame]) {
         
         _distanceLB = [[UILabel alloc]init];
-        _distanceLB.text = @"0.00";
+        _distanceLB.text = @"00.00";
         _distanceLB.font =  [UIFont fontWithName:@"AmericanTypewriter-Bold" size:80];
         _distanceLB.textAlignment = NSTextAlignmentCenter;
         //文本文字自适应大小
       //  _distanceLB.adjustsFontSizeToFitWidth = YES;
+      //  [_distanceLB setBackgroundColor:[UIColor redColor]];
         [self addSubview:_distanceLB];
         [_distanceLB mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(10);
+            make.left.right.mas_equalTo(0);
             make.centerX.mas_equalTo(0);
         }];
         
@@ -84,7 +86,7 @@ static NSInteger _timerNumber;
         
         
         UILabel *unit4Speed =[UILabel new];
-        unit4Speed.text = @"平均速度(m/s)";
+        unit4Speed.text = @"速度(m/s)";
         unit4Speed.font = [UIFont systemFontOfSize:12];
         [self addSubview:unit4Speed];
         [unit4Speed mas_makeConstraints:^(MASConstraintMaker *make) {
@@ -107,9 +109,10 @@ static NSInteger _timerNumber;
 }
 
 - (void)startTimer{
-    _timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(chanageTimeValue) userInfo:nil repeats:YES];
-    // [[NSDate alloc]timeIntervalSinceDate: (NSDate *)userInfo.userInfo[@"timestamp"]];
-   // NSLog(@"%ld",_timerNumber);
+    //防止多次点击
+    if (!_timer) {
+        _timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(chanageTimeValue) userInfo:nil repeats:YES];
+    }
 }
 
 - (void)stopTimer{

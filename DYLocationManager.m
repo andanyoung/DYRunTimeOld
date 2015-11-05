@@ -75,7 +75,7 @@ static BMKLocationService *locationService;
         }
         _totalDistanc += distance;
         _timestamp = location.timestamp;
-        
+        _speed = location.speed;
     }
     [self.locations addObject:location];
     
@@ -97,18 +97,17 @@ static BMKLocationService *locationService;
     
     _timerNumber = 0;
     _totalDistanc = 0;
+    _running = true;
     
     [locationService startUserLocationService];
-    //发送通知，启动计时器(为了让定时器同步)
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"startUpdateLocation" object:self];
+    [self.delegate locationManage:self didChangeUpdateLocationState:_running];
 }
 
 - (void)stopUpdatingLocation{
     [locationService stopUserLocationService];
     locationService = nil;
-
-   
-
+    _running = false;
+    [self.delegate locationManage:self didChangeUpdateLocationState:_running];
 }
 
 @end
