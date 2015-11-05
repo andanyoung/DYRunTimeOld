@@ -199,7 +199,7 @@
     return nil;
 }
 - (void)didFailToLocateUserWithError:(NSError *)error{
-    WCLog(@"error");
+    DDLogError(@"error:%@",error);
 }
 
 /**
@@ -208,7 +208,7 @@
  */
 - (void)willStartLocatingUser
 {
-    WCLog(@"start locate");
+    DDLogInfo(@"start locate");
 }
 
 

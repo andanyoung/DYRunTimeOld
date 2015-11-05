@@ -40,7 +40,7 @@ static BMKLocationService *locationService;
 #pragma mark - BMKLocationServiceDelegate
 
 - (void)didFailToLocateUserWithError:(NSError *)error{
-    WCLog(@"error");
+    DDLogWarn(@" 定位失败 error %@",error);
 }
 
 //处理位置坐标更新
@@ -62,7 +62,7 @@ static BMKLocationService *locationService;
  //       return;
 //    }
 #warning test
-    NSLog(@"dingwei");
+    DDLogInfo(@"dingwei");
     
     if(self.locations.count>1){
         

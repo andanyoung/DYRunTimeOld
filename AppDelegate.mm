@@ -37,9 +37,16 @@ BMKMapManager* _mapManager;
 //}
 
 
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+  //  [DDLog addLogger:[DDASLLogger sharedInstance]];
+    [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
+    [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
+    [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:DDLogFlagInfo];
+    
+
     // 设置主窗口,并设置跟控制器
     self.window = [[UIWindow alloc]init];
     self.window.frame = [UIScreen mainScreen].bounds;
@@ -53,7 +60,8 @@ BMKMapManager* _mapManager;
     //key
     BOOL ret = [_mapManager start:Key generalDelegate:nil];
     if (!ret) {
-        WCLog(@"manager start failed!");
+       
+        DDLogError(@"manager start failed!");
     }
     
     //_locationManager = [DYLocationManager shareLocationManager];
@@ -64,6 +72,7 @@ BMKMapManager* _mapManager;
     //    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
     //         _locationManager.locationService.allowsBackgroundLocationUpdates = YES;
     //    }
+    
     
     
     return YES;
