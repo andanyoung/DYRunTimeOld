@@ -74,7 +74,7 @@ static BMKLocationService *locationService;
             return;
         }
         _totalDistanc += distance;
-        _timestamp = location.timestamp;
+      //  _timestamp = location.timestamp;
         _speed = location.speed;
     }
     [self.locations addObject:location];
@@ -95,15 +95,16 @@ static BMKLocationService *locationService;
         locationService.delegate = self;
     }
     
-    _timerNumber = 0;
+   // _timerNumber = 0;
     _totalDistanc = 0;
     _running = true;
-    
-    [locationService startUserLocationService];
     [self.delegate locationManage:self didChangeUpdateLocationState:_running];
+    [locationService startUserLocationService];
+    
 }
 
 - (void)stopUpdatingLocation{
+    
     [locationService stopUserLocationService];
     locationService = nil;
     _running = false;

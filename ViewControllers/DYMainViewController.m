@@ -10,15 +10,13 @@
 #import "DYRecordView.h"
 #import "DYLocationManager.h"
 #import "MapViewController.h"
+#import "DYFMDBManager.h"
 
 @interface DYMainViewController ()<DYLocationManagerDelegate>
 
-@property (nonatomic,strong) UILabel *distanceLB;
-@property (nonatomic,strong) UILabel *timeLB;
-@property (nonatomic,strong) UILabel *speedLB;
 
 @property (nonatomic,strong) DYRecordView *tableHeaderView;
-@property (nonatomic,weak) NSArray *locations;
+@property (nonatomic,weak) NSArray<CLLocation *> *locations;
 @end
 
 @implementation DYMainViewController
@@ -29,9 +27,7 @@
     _tableHeaderView = [[DYRecordView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 250)];
     [_tableHeaderView setBackgroundColor:[UIColor colorWithRed:0.97 green:0.97 blue:0.97 alpha:0.79]];
     self.tableView.tableHeaderView = _tableHeaderView;
-    _timeLB = _tableHeaderView.timeLB;
-    _distanceLB = _tableHeaderView.distanceLB;
-    _speedLB = _tableHeaderView.speedLB;
+
     
     self.title = @"RunTime";
     
@@ -66,9 +62,9 @@
 }
 
 #pragma mark - DYLocationManagerDelegate
-- (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <BMKUserLocation *>*)locations{
-    _distanceLB.text = [NSString stringWithFormat:@"%05.2lf", manager.totalDistanc/1000.0];
-    _speedLB.text = [NSString stringWithFormat:@"%05.2lf",manager.speed];
+- (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
+    _tableHeaderView.distanceLB.text = [NSString stringWithFormat:@"%05.2lf", manager.totalDistanc/1000.0];
+    _tableHeaderView.speedLB.text = [NSString stringWithFormat:@"%05.2lf",manager.speed];
     _locations = locations;
 }
 
@@ -78,7 +74,16 @@
        
     }else{
         [self.tableHeaderView stopTimer];
-        
+        if( [DYFMDBManager saveLocations]){
+            [manager.locations removeAllObjects];
+            [self showSuccessMsg:@"保存成功"];
+        }else{
+            [self showErrorMsg:@"保存失败"];
+        }
+        [NSTimer bk_scheduledTimerWithTimeInterval:1 block:^(NSTimer *timer) {
+            [self hideProgress];
+        } repeats:NO];
+      
     }
 }
 

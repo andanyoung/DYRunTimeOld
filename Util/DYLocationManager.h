@@ -14,7 +14,7 @@
 /**
  *  当位置发生变化时调用
  */
-- (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <BMKUserLocation *>*)locations;
+- (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations;
 
 @optional
 /**
@@ -26,15 +26,15 @@
 
 @interface DYLocationManager : NSObject
 
-@property (nonatomic,strong) NSMutableArray *locations;
+@property (nonatomic,strong) NSMutableArray<CLLocation *> *locations;
 //@property (nonatomic, strong) BMKLocationService *locationService;
 @property (nonatomic, weak)id<DYLocationManagerDelegate> delegate;
 
-/*  用于保存总表
+/*  用于保存总记录
  */
-@property (nonatomic) NSInteger timerNumber;
+//@property (nonatomic) NSInteger timerNumber;
 @property (nonatomic) double totalDistanc;
-@property (nonatomic,weak) NSDate *timestamp;
+//@property (nonatomic,weak) NSDate *timestamp;
 @property (nonatomic) double speed;
 
 @property (nonatomic) BOOL running;

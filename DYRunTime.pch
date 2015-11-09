@@ -37,9 +37,9 @@
 ////#endif
 ///*Xcode7以下版本需要添加上方宏定义 支持AF*/
 //
-//#import <UIKit/UIKit.h>
-//#import <Foundation/Foundation.h>
-//#import "AppDelegate.h"
+#import <BlocksKit.h>
+//#import <BlocksKit+MessageUI.h>
+#import <BlocksKit+UIKit.h>
 //
 ////用于存放全局宏定义 或者 静态字符串
 #import "Constants.h"
@@ -63,12 +63,15 @@ static const DDLogLevel ddLogLevel = DDLogLevelVerbose;
 #else
 static const DDLogLevel ddLogLevel = DDLogLevelError;
 #endif
-//
-//#import <MBProgressHUD.h>
+
+#import <MBProgressHUD.h>
+
+#import "NSObject+Common.h"       //个人添加的在界面上弹出提示的类拓展
+
 ////#import <SVProgressHUD.h>
 ////#import <UIImageView+WebCache.h>
 //#import <Masonry.h>
 //
-////#import "NSObject+Common.h"
+
 //
 //#endif /* PrefixHeader_pch */
