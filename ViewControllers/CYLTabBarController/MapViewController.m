@@ -28,7 +28,7 @@
 //百度地图View
 @property (weak, nonatomic) IBOutlet BMKMapView *mapView;
 @property (nonatomic, strong) BMKPolyline *polyLine;
-@property (nonatomic, strong) DYLocationManager *locationManager;
+//@property (nonatomic, strong) DYLocationManager *locationManager;
 
 @end
 
@@ -37,10 +37,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    appDelegate.locationManager.delegate = self;
-    self.locationManager = appDelegate.locationManager;
+    [self showProgress];
+//    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+//    appDelegate.locationManager.delegate = self;
+//    self.locationManager = appDelegate.locationManager;
     
     //初始化定位
     [self initLocation];
@@ -49,6 +49,7 @@
         [self drawWalkPolyline:_locations];
     }
     
+    _mapView.delegate = self;
 }
 
 
@@ -63,6 +64,11 @@
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     _mapView.delegate = nil;//不用时，值nil。释放内存
+}
+
+#pragma mark - BMKMapViewDelegate
+- (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
+    [self hideProgress];
 }
 
 #pragma mark -- 初始化定位
@@ -85,8 +91,10 @@
 /** 开始定位 */
 - (void)startLocation{
     
+    [DYLocationManager shareLocationManager].delegate = self;
+    
     //[_mapView setShowsUserLocation:YES];//开始定位
-    [_locationManager startUpdatingLocation];
+   // [_locationManager startUpdatingLocation];
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
     _mapView.showsUserLocation = YES;//显示定位图层,开始定位

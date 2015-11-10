@@ -7,8 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CoreLocation/CoreLocation.h>
 
-@class DYLocationManager,CLLocation,BMKLocationService,BMKUserLocation;
+@class DYLocationManager,BMKLocationService,BMKUserLocation;
 
 @protocol DYLocationManagerDelegate <NSObject>
 /**

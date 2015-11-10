@@ -12,7 +12,8 @@
 @property (nonatomic,strong) UILabel *distanceLB;
 @property (nonatomic,strong) UILabel *timeLB;
 @property (nonatomic,strong) UILabel *speedLB;
-
+@property (nonatomic)NSInteger timerNumber;
+@property (nonatomic, strong) NSTimer *timer;
 /**
  *  开启计时器，更新界面的定时器
  */

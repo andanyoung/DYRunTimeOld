@@ -19,7 +19,8 @@ static BMKLocationService *locationService;
 @end
 
 @implementation DYLocationManager
-- (NSMutableArray *)locations{
+
+- (NSMutableArray<CLLocation *> *)locations{
     if (!_locations) {
         _locations = [NSMutableArray new];
     }
@@ -70,9 +71,9 @@ static BMKLocationService *locationService;
         //计算本次定位数据与上一次定位之间的距离
         CGFloat distance = [location distanceFromLocation:[self.locations lastObject]];
         // (5.0米门限值，存储数组画线) 如果距离少于 5.0 米，则忽略本次数据直接返回方法
-        if (distance < 5.0) {
-            return;
-        }
+//        if (distance < 5.0) {
+//            return;
+//        }
         _totalDistanc += distance;
       //  _timestamp = location.timestamp;
         _speed = location.speed;

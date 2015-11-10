@@ -16,10 +16,18 @@
 
 
 @property (nonatomic,strong) DYRecordView *tableHeaderView;
-@property (nonatomic,weak) NSArray<CLLocation *> *locations;
+//@property (nonatomic,weak) NSArray <CLLocation *> *locations;
+@property (nonatomic,strong) DYLocationManager *locationManager;
 @end
 
 @implementation DYMainViewController
+
+- (DYLocationManager *)locationManager{
+    if (_locationManager == nil) {
+        _locationManager = [DYLocationManager shareLocationManager];
+    }
+    return _locationManager;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -38,19 +46,28 @@
 
 - (void)clickLocation{
     MapViewController *mapVc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
-    mapVc.locations = [NSMutableArray arrayWithArray:_locations];
+    mapVc.locations = [NSMutableArray arrayWithArray:self.locationManager.locations];
     [self presentViewController:mapVc animated:YES completion:nil];
+   // self.locationManager.delegate = mapVc;
 }
 
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [DYLocationManager shareLocationManager].delegate = self;
     
+    [_tableHeaderView.timer setFireDate:[NSDate distantPast]];//开启定时器
+    
+    NSArray<CLLocation *> *array = _locationManager.locations;
+    if (array.count<2||array == nil) return ;
+    NSTimeInterval timeInterval = [[array lastObject].timestamp timeIntervalSinceDate:[array firstObject].timestamp];
+    _tableHeaderView.timerNumber = (NSInteger)timeInterval;
+
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
-    [super viewWillDisappear:animated];
     [DYLocationManager shareLocationManager].delegate = nil;
+    [super viewWillDisappear:animated];
+    [_tableHeaderView.timer setFireDate:[NSDate distantFuture]];//关闭定时器,invalidate会让timer，退出loop，取消timer
 }
 
 
@@ -65,7 +82,7 @@
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
     _tableHeaderView.distanceLB.text = [NSString stringWithFormat:@"%05.2lf", manager.totalDistanc/1000.0];
     _tableHeaderView.speedLB.text = [NSString stringWithFormat:@"%05.2lf",manager.speed];
-    _locations = locations;
+    //_locations = locations;
 }
 
 - (void)locationManage:(DYLocationManager *)manager didChangeUpdateLocationState:(BOOL)running{

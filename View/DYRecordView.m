@@ -9,8 +9,7 @@
 #import "DYRecordView.h"
 #import <Masonry.h>
 
-static NSTimer *_timer;
-static NSInteger _timerNumber;
+
 @interface DYRecordView ()
 
 @end
@@ -124,5 +123,6 @@ static NSInteger _timerNumber;
 - (void)chanageTimeValue{
     _timerNumber++;
     _timeLB.text = [NSString stringWithFormat:@"%.2ld:%.2ld", _timerNumber/60 ,_timerNumber%60];
+    DDLogVerbose(@"%@",_timeLB.text);
 }
 @end

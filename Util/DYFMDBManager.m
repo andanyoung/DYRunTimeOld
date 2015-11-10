@@ -75,10 +75,28 @@
 }
 
 + (NSArray *)resToList:(FMResultSet *)rs{
-//    NSMutableArray *dataArr = [NSMutableArray new];
-//    while ([rs next]) {
-//        
-//    }
+    NSMutableArray<DYRunRecord *> *dataArr = [NSMutableArray new];
+    while ([rs next]) {
+        DYRunRecord *record = [DYRunRecord new];
+        record.date = [rs stringForColumn:@"date"];
+        record.startTime = [rs stringForColumn:@"startTime"];
+        record.endTime = [rs stringForColumn:@"endTime"];
+        record.totalDistanc = [rs stringForColumn:@"totalDistanc"];
+        record.totalTime = [rs stringForColumn:@"totalTime"];
+        [dataArr addObject:record];
+    }
+    
+    return dataArr;
+}
+
++ (NSArray *)getAllLocations{
+    FMDatabase *db = [self defaultDatabase];
+    if ([db open]) {
+        FMResultSet *rs = [db executeQuery:@"select * from RecordTable"];
+        NSArray *arr = [self resToList:rs];
+        [db close];
+        return arr;
+    }
     
     return nil;
 }
