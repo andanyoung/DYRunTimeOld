@@ -11,6 +11,8 @@
 #import "DYLocationManager.h"
 #import "MapViewController.h"
 #import "DYFMDBManager.h"
+#import "DYRunRecord.h"
+#import "DYRunRecordCell.h"
 
 @interface DYMainViewController ()<DYLocationManagerDelegate>
 
@@ -18,9 +20,18 @@
 @property (nonatomic,strong) DYRecordView *tableHeaderView;
 //@property (nonatomic,weak) NSArray <CLLocation *> *locations;
 @property (nonatomic,strong) DYLocationManager *locationManager;
+@property (nonatomic, strong) NSArray *allDates;
 @end
 
 @implementation DYMainViewController
+
+- (NSArray *)allDates{
+    if (!_allDates) {
+        _allDates = [DYFMDBManager getAllListLocations];
+    }
+    return _allDates;
+}
+
 
 - (DYLocationManager *)locationManager{
     if (_locationManager == nil) {
@@ -61,12 +72,14 @@
     if (array.count<2||array == nil) return ;
     NSTimeInterval timeInterval = [[array lastObject].timestamp timeIntervalSinceDate:[array firstObject].timestamp];
     _tableHeaderView.timerNumber = (NSInteger)timeInterval;
+    
 
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
     [DYLocationManager shareLocationManager].delegate = nil;
     [super viewWillDisappear:animated];
+    DDLogInfo(@"viewWillDisappear");
     [_tableHeaderView.timer setFireDate:[NSDate distantFuture]];//关闭定时器,invalidate会让timer，退出loop，取消timer
 }
 
@@ -108,27 +121,49 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
 
-    return 10;
+    return self.allDates.count;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
-    return 10;
+    NSArray *arr = self.allDates[section];
+    return arr.count;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section{
-    return [NSString stringWithFormat:@"%ld",section];
+    NSArray *arr = self.allDates[section];
+    DYRunRecord *record = arr[0];
+    return record.date;
 }
 
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
-    
+    DYRunRecordCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
+
     // Configure the cell...
-    cell.textLabel.text = [NSString stringWithFormat:@"%ld",indexPath.row ];
+    NSArray *arr = self.allDates[indexPath.section];
+    DYRunRecord *record = arr[indexPath.row];
+    cell.accessoryType = 1;
+    cell.totalDistancLb.text = [NSString stringWithFormat:@"%@公里",record.totalDistanc];
+    cell.totalTimeLb.text = [NSString stringWithFormat:@"%@s",record.totalTime];
+    cell.timeLb.text = [NSString stringWithFormat:@"%@ ~ %@",record.startTime,record.endTime];
+    
     return cell;
 }
 
+kRemoveCellSeparator
 
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
+
+- (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    return UITableViewAutomaticDimension;
+}
+
+//- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+//    return 100;
+//}
 /*
 // Override to support conditional editing of the table view.
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {

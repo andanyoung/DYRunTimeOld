@@ -7,7 +7,12 @@
 //
 
 #import "DYRecordViewModel.h"
+#import "DYFMDBManager.h"
+#import "DYRunRecord.h"
 
 @implementation DYRecordViewModel
+
+
+
 
 @end

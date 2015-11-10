@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-@class FMDatabase;
+#import <FMDatabase.h>
 
 @interface DYFMDBManager : NSObject
 /**
@@ -29,7 +29,12 @@
  *
  *  @return 查询结果
  */
-+ (NSArray *)executeQueryWithSql:(NSString *)sql;
+//+ (NSArray *)executeQueryWithSql:(NSString *)sql;
 
 + (BOOL)saveLocations;
+
+/**
+ *  返回所有的数据
+ */
++ (NSArray *)getAllListLocations;
 @end

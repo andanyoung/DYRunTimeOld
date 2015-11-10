@@ -17,6 +17,8 @@
 #import "DYMainViewController.h"
 #import "DYNewsViewController.h"
 
+//#import "DYRecordView.h"
+
 
 BMKMapManager* _mapManager;
 

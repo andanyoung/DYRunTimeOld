@@ -62,20 +62,22 @@
     return NO;
 }
 
-+ (NSArray *)executeQueryWithSql:(NSString *)sql{
-    FMDatabase *db = [self defaultDatabase];
-    if ([db open]) {
-        FMResultSet *rs = [db executeQuery:sql];
-        NSArray *arr = [self resToList:rs];
-        [db close];
-        return arr;
-    }
-    
-    return nil;
-}
+//+ (NSArray *)executeQueryWithSql:(NSString *)sql{
+//    FMDatabase *db = [self defaultDatabase];
+//    if ([db open]) {
+//        FMResultSet *rs = [db executeQuery:sql];
+//       // NSArray *arr = [self resToList:rs];
+//        [db close];
+//        return arr;
+//    }
+//    
+//    return nil;
+//}
 
 + (NSArray *)resToList:(FMResultSet *)rs{
-    NSMutableArray<DYRunRecord *> *dataArr = [NSMutableArray new];
+    NSMutableArray *arr = [NSMutableArray new];
+
+    NSString *date = nil;
     while ([rs next]) {
         DYRunRecord *record = [DYRunRecord new];
         record.date = [rs stringForColumn:@"date"];
@@ -83,17 +85,27 @@
         record.endTime = [rs stringForColumn:@"endTime"];
         record.totalDistanc = [rs stringForColumn:@"totalDistanc"];
         record.totalTime = [rs stringForColumn:@"totalTime"];
-        [dataArr addObject:record];
+        
+        if ([record.date isEqualToString:date]) {
+            NSMutableArray *dataArr = [arr lastObject];
+            [dataArr addObject:record];
+        }else{
+
+            [arr addObject: [[NSMutableArray alloc]initWithObjects:record, nil]];
+        }
+        date = record.date;
+  
     }
     
-    return dataArr;
+    return [arr copy];
 }
 
-+ (NSArray *)getAllLocations{
++ (NSArray *)getAllListLocations{
     FMDatabase *db = [self defaultDatabase];
     if ([db open]) {
-        FMResultSet *rs = [db executeQuery:@"select * from RecordTable"];
+        FMResultSet *rs = [db executeQuery:@"select * from RecordTable ORDER BY date DESC"];
         NSArray *arr = [self resToList:rs];
+        [db closeOpenResultSets];
         [db close];
         return arr;
     }
@@ -113,16 +125,16 @@
     DYRunRecord *record = [DYRunRecord new];
     record.startTime = [dateFormatter stringFromDate: [array firstObject].timestamp];
     record.endTime = [dateFormatter stringFromDate: [array lastObject].timestamp];
-    record.totalDistanc = [NSString stringWithFormat:@"%lf" ,locationManage.totalDistanc ];
+    record.totalDistanc = [NSString stringWithFormat:@"%.2lf" ,locationManage.totalDistanc ];
     record.totalTime = [NSString stringWithFormat:@"%ld:%ld",(NSInteger)timeInterval/60,(NSInteger)timeInterval%60];
     [dateFormatter setDateFormat:@"yyyy-MM-dd"];
     record.date = [dateFormatter stringFromDate:[array firstObject].timestamp];
    
-   
-    [DYFMDBManager executeUpdateWithSql: [NSString stringWithFormat: @"insert into RecordTable (date ,startTime ,endTime ,totalDistanc ,totalTime) values ('%@','%@','%@','%@','%@')",record.date,record.startTime,record.endTime,record.totalDistanc,record.totalTime]];
+    if (record.date == nil) return false;
+    return [DYFMDBManager executeUpdateWithSql: [NSString stringWithFormat: @"insert into RecordTable (date ,startTime ,endTime ,totalDistanc ,totalTime) values ('%@','%@','%@','%@','%@')",record.date,record.startTime,record.endTime,record.totalDistanc,record.totalTime]];
     
   
-    return YES;
+    
 }
 
 

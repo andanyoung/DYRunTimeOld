@@ -9,5 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface DYRecordViewModel : NSObject
-
+@property (nonatomic, strong) NSDictionary *dataDict;
+@property (nonatomic) NSInteger rowNumber;
 @end
