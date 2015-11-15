@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <FMDatabase.h>
+#import "DYRunRecord.h"
 
 @interface DYFMDBManager : NSObject
 /**
@@ -31,12 +32,12 @@
  */
 //+ (NSArray *)executeQueryWithSql:(NSString *)sql;
 
-+ (BOOL)saveLocations;
++ (DYRunRecord *)saveLocations;
 
 /**
  *  返回所有的数据
  */
-+ (NSArray *)getAllListLocations;
++ (NSMutableArray *)getAllListLocations;
 
 + (NSArray *)getLocationsWithDate:(NSString *)date andStartTime:(NSString *)startTime;
 

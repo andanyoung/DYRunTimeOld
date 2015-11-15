@@ -9,11 +9,13 @@
 #import "MapViewController.h"
 #import "AppDelegate.h"
 #import "DYLocationManager.h"
+#import "DYRunRecord.h"
+#import "DYFMDBManager.h"
 
 #define polylineWith 10.0
 #define polylineColor [[UIColor greenColor] colorWithAlphaComponent:1]
 #define mapViewZoomLevel 20
-
+#define removeObjectsLen 20
 
 
 #import <BaiduMapAPI_Map/BMKMapComponent.h>//引入地图功能所有的头文件//只引入所需的单个头文件
@@ -21,7 +23,7 @@
 
 
 
-@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate,UIViewControllerPreviewingDelegate>{
+@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate,UIPreviewActionItem>{
   //  BMKLocationService *_locaService;//由于系统原因，iOS不允许使用第三方定位，因此地图SDK中的定位方法，本质上是对原生定位的二次封装。
 }
 
@@ -49,7 +51,7 @@
     
     [_mapView viewWillAppear];
     if (_type != MapViewTypeQueryDetail) {
-       [self startLocation]; 
+       [self startLocation];
     }
     
 }
@@ -73,9 +75,9 @@
     displayParam.locationViewImgName = @"walk";//定位图标名称
     [_mapView updateLocationViewWithParam:displayParam];
     
-    _mapView.zoomLevel = 20;
+    
     _mapView.showMapScaleBar = YES;
-
+    _mapView.zoomLevel = 20;
     _mapView.delegate = self;
     
     if (  _type != MapViewTypeLocation && _locations.count>1 ) {
@@ -117,7 +119,7 @@
 
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
     CLLocation *location = [locations lastObject];
-    
+//    _mapView.zoomLevel = 20;
     [_mapView setCenterCoordinate:location.coordinate animated:YES];
     BMKUserLocation *userLocation = [BMKUserLocation new];
     [userLocation setValue:location forKey:@"location"];
@@ -125,12 +127,12 @@
     [_mapView updateLocationData:userLocation];
     
     if(_type == MapViewTypeLocation){
-         [_locationManager stopUpdatingLocation];
         return;
     }
     [self drawWalkPolyline:locations];
     
 }
+
 
 
 
@@ -266,8 +268,10 @@
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-//    UIAlertView *alert = [[UIAlertView alloc]initWithTitle:@"内存警告" message:@"😢😢😢😢😢😢" delegate:self cancelButtonTitle:@"cancle" otherButtonTitles: nil];
-//    [alert show];
+    
+    //内存警告时，移除内存大的
+    NSRange range = NSMakeRange(0, removeObjectsLen);
+    [_locationManager.locations removeObjectsInRange:range];
 }
 
 
@@ -275,24 +279,32 @@
 //    if (!self.isRunning) {//不是run
 //        [_locationManager stopUpdatingLocation];
 //    }
+    if (_locationManager.running && _type != MapViewTypeRunning) {
+        [_locationManager stopUpdatingLocation];
+    }
     [self dismissModalViewControllerAnimated:YES];
 }
 
 //底部预览界面选项
 - (NSArray<id<UIPreviewActionItem>> *)previewActionItems{
-    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"action1" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
-        NSLog(@"action1 %@",previewViewController);
+    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"查看" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
+        [previewViewController showDetailViewController:self sender:previewViewController];
     }];
     
-    UIPreviewAction *action2 = [UIPreviewAction actionWithTitle:@"action2" style:UIPreviewActionStyleDestructive handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
-        NSLog(@"action2 %@",previewViewController);
+    UIPreviewAction *action2 = [UIPreviewAction actionWithTitle:@"删除" style:UIPreviewActionStyleDestructive handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
+        
+        [[UIAlertView bk_showAlertViewWithTitle:@"删除记录？" message:@"确定要删除此纪录吗？" cancelButtonTitle:@"点错了" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
+            if (buttonIndex==1) {
+
+                if([DYFMDBManager deleteRecordsWithDate:[_locations[0] valueForKey:@"date"] andStartTime:[_locations[0] valueForKey:@"startTime"]]){
+                  //  previewViewController
+                }
+            }
+        }] show];
     }];
-    
-    UIPreviewAction *action3 = [UIPreviewAction actionWithTitle:@"action2" style:UIPreviewActionStyleSelected handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
-        NSLog(@"action3 %@",previewViewController);
-    }];
-    
-    return @[action1,action2,action3];
+
+
+    return @[action1,action2];
 }
 
 

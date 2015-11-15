@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface DYMainViewController : UITableViewController
-
+- (void) refreshDataForTableViewWith:(id)object withSection:(NSInteger)section;
 @end

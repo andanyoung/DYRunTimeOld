@@ -7,13 +7,6 @@
 //
 
 #import "CYLPlusButton.h"
-@class CYLPlusButtonSubclass;
-
-@protocol CYLPlusButtonSubclassingDelegate <NSObject>
-
-- (void)clickPlusButton:(CYLPlusButtonSubclass *)plusButton;
-
-@end
 
 @interface CYLPlusButtonSubclass : CYLPlusButton<CYLPlusButtonSubclassing>
 

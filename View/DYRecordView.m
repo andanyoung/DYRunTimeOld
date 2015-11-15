@@ -108,9 +108,12 @@
 }
 
 - (void)startTimer{
+    [self resetRecord];
     //防止多次点击
     if (!_timer) {
         _timer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(chanageTimeValue) userInfo:nil repeats:YES];
+    }else{
+        [_timer setFireDate:[NSDate distantPast]];
     }
 }
 
@@ -127,5 +130,12 @@
     DDLogVerbose(@"%@",_timeLB.text);
 }
 
+- (void)resetRecord{
+    _timeLB.text = @"00:00";
+    _distanceLB.text = @"00:00";
+    _speedLB.text = @"00.00";
+    _timerNumber = 0;
+    [_timer setFireDate:[NSDate distantFuture]];
+}
 
 @end

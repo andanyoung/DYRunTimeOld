@@ -18,8 +18,11 @@ typedef enum : NSUInteger {
 } MapViewType;
 
 @interface MapViewController : UIViewController
+/** 保存经纬度信息 */
 @property (strong, nonatomic)NSMutableArray *locations;
 /** 判断是定位还是，运动 */
 @property (nonatomic) MapViewType type;
+/** 用于peek上拉，保存peek的选项 */
+@property (nonatomic, weak) NSIndexPath *indexParh;
 
 @end

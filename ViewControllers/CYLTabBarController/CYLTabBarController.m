@@ -2,7 +2,7 @@
 //  CYLTabBarController.m
 //  CYLCustomTabBarDemo
 //
-//  Created by 微博@iOS程序犭袁 (http://weibo.com/luohanchenyilong/) on 10/20/15.
+//  Created by  (http://weibo.com/luohanchenyilong/) on 10/20/15.
 //  Copyright © 2015 https://github.com/ChenYilong . All rights reserved.
 //
 
@@ -11,8 +11,7 @@
 #import "CYLTabBar.h"
 #import <objc/runtime.h>
 
-
-
+#import "DYLocationManager.h"
 NSUInteger CYLTabbarItemsCount = 0;
 
 @interface UIViewController (CYLTabBarControllerItemInternal)
@@ -27,50 +26,38 @@ NSUInteger CYLTabbarItemsCount = 0;
 @implementation CYLTabBarController
 @synthesize viewControllers = _viewControllers;
 
+#pragma mark -
 #pragma mark - Life Cycle
 
 -(void)viewDidLoad{
     [super viewDidLoad];
-    // 设置 TabBarItemTestAttributes 的颜色。
-    [self setUpTabBarItemTextAttributes];
     // 处理tabBar，使用自定义 tabBar 添加 发布按钮
     [self setUpTabBar];
-    [[UITabBar appearance] setBackgroundImage:[self imageWithColor:[UIColor whiteColor]]];
 }
 
-
-
-
+#pragma mark -
 #pragma mark - Private Methods
 
 /**
  *  利用 KVC 把 系统的 tabBar 类型改为自定义类型。
  */
 - (void)setUpTabBar {
-    [self setValue:[[CYLTabBar alloc] init] forKey:@"tabBar"];//[CYLTabBar alloc] init] 用到了initWithFrame
-}
-
-/**
- *  tabBarItem 的选中和不选中文字属性
- */
-- (void)setUpTabBarItemTextAttributes{
-
-    // set the text color for unselected state
-    // 普通状态下的文字属性
-    NSMutableDictionary *normalAttrs = [NSMutableDictionary dictionary];
-    normalAttrs[NSForegroundColorAttributeName] = [UIColor grayColor];
-
-    // set the text color for selected state
-    // 选中状态下的文字属性
-    NSMutableDictionary *selectedAttrs = [NSMutableDictionary dictionary];
-    selectedAttrs[NSForegroundColorAttributeName] = [UIColor darkGrayColor];
-
-    // set the text Attributes
-    // 设置文字属性
-    UITabBarItem *tabBarItem = [UITabBarItem appearance];
-    [tabBarItem setTitleTextAttributes:normalAttrs forState:UIControlStateNormal];
-    [tabBarItem setTitleTextAttributes:selectedAttrs forState:UIControlStateSelected];
+    [self setValue:[[CYLTabBar alloc] init] forKey:@"tabBar"];
     
+    //为按钮添加事件
+    [CYLExternPushlishButton bk_addEventHandler:^(id sender) {
+        self.selectedIndex = 1;
+        DYLocationManager *locationManager = [DYLocationManager shareLocationManager];
+        if (!locationManager.running) {
+            locationManager.delegate = ((UINavigationController *)self.selectedViewController).viewControllers[0];
+            [locationManager startUpdatingLocation];
+          
+        }else{
+            [locationManager stopUpdatingLocation];
+            locationManager.delegate = nil;
+        }
+        
+    } forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers {
@@ -132,21 +119,6 @@ NSUInteger CYLTabbarItemsCount = 0;
     
 }
 
-- (UIImage *)imageWithColor:(UIColor *)color
-{
-    NSParameterAssert(color != nil);
-    
-    CGRect rect = CGRectMake(0, 0, 1, 1);
-    // Create a 1 by 1 pixel context
-    UIGraphicsBeginImageContextWithOptions(rect.size, NO, 0);
-    [color setFill];
-    UIRectFill(rect);   // Fill it with your color
-    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return image;
-}
-
 @end
 
 #pragma mark - UIViewController+CYLTabBarControllerItem
@@ -154,7 +126,7 @@ NSUInteger CYLTabbarItemsCount = 0;
 @implementation UIViewController (CYLTabBarControllerItemInternal)
 
 - (void)cyl_setTabBarController:(CYLTabBarController *)tabBarController {
-    objc_setAssociatedObject(self, @selector(cyl_tabBarController), tabBarController, OBJC_ASSOCIATION_ASSIGN); 
+    objc_setAssociatedObject(self, @selector(cyl_tabBarController), tabBarController, OBJC_ASSOCIATION_ASSIGN);
 }
 
 @end
@@ -170,8 +142,5 @@ NSUInteger CYLTabbarItemsCount = 0;
     
     return tabBarController;
 }
-
-
-
 
 @end

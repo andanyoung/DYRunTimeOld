@@ -10,7 +10,7 @@
 #import "CYLTabBarController.h"
 
 UIButton<CYLPlusButtonSubclassing> *CYLExternPushlishButton = nil;
-@interface CYLPlusButton ()
+@interface CYLPlusButton ()<UIActionSheetDelegate>
 
 @end
 
@@ -20,23 +20,10 @@ UIButton<CYLPlusButtonSubclassing> *CYLExternPushlishButton = nil;
 #pragma mark - Private Methods
 
 + (void)registerSubclass {
-    
-    /**
-     1，实例方法里面的self，是对象的首地址。
-     2，类方法里面的self，是Class.
-     */
-    
     if ([self conformsToProtocol:@protocol(CYLPlusButtonSubclassing)]) {
         Class<CYLPlusButtonSubclassing> class = self;
-        CYLExternPushlishButton = [class plusButton];// 初始化子类 CYLPlusButtonSubclass
+        CYLExternPushlishButton = [class plusButton];
     }
-    
-    /**
-     子类 CYLPlusButtonSubclass 在load的时候就替换了 父类
-     +(void)load {
-     [super registerSubclass];
-     }
-     */
 }
 
 @end

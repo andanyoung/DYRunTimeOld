@@ -71,7 +71,7 @@
 
 
 
-+ (NSArray *)resToList:(FMResultSet *)rs{
++ (NSMutableArray *)resToList:(FMResultSet *)rs{
     NSMutableArray *arr = [NSMutableArray new];
 
     NSString *date = nil;
@@ -94,7 +94,7 @@
   
     }
     
-    return [arr copy];
+    return arr;
 }
 
 + (BOOL)deleteRecordsWithDate:(NSString *)date andStartTime:(NSString *)startTime{
@@ -120,11 +120,11 @@
     return nil;
 }
 
-+ (NSArray *)getAllListLocations{
++ (NSMutableArray *)getAllListLocations{
     FMDatabase *db = [self defaultDatabase];
     if ([db open]) {
         FMResultSet *rs = [db executeQuery:@"select * from RecordTable ORDER BY date DESC"];
-        NSArray *arr = [self resToList:rs];
+        NSMutableArray *arr = [self resToList:rs];
         [db closeOpenResultSets];
         [db close];
         return arr;
@@ -133,7 +133,7 @@
     return nil;
 }
 
-+ (BOOL)saveLocations{
++ (DYRunRecord *)saveLocations{
 
     DYLocationManager *locationManage = [DYLocationManager shareLocationManager];
     NSArray<CLLocation *> *array = locationManage.locations;
@@ -145,7 +145,7 @@
     DYRunRecord *record = [DYRunRecord new];
     record.startTime = [dateFormatter stringFromDate: [array firstObject].timestamp];
     record.endTime = [dateFormatter stringFromDate: [array lastObject].timestamp];
-    record.totalDistanc = [NSString stringWithFormat:@"%.2lf" ,locationManage.totalDistanc ];
+    record.totalDistanc = [NSString stringWithFormat:@"%.2lf" ,locationManage.totalDistanc / 1000.0 ];
     record.totalTime = [NSString stringWithFormat:@"%02ld:%02ld",(NSInteger)timeInterval/60,(NSInteger)timeInterval%60];
     [dateFormatter setDateFormat:@"yyyy-MM-dd"];
     record.date = [dateFormatter stringFromDate:[array firstObject].timestamp];
@@ -153,14 +153,14 @@
 #warning 暂时先这么写吧，以后加上事务回滚
     if (record.date == nil) return false;
     BOOL isSuccess = [DYFMDBManager executeUpdateWithSql: [NSString stringWithFormat: @"insert into RecordTable (date ,startTime ,endTime ,totalDistanc ,totalTime) values ('%@','%@','%@','%@','%@')",record.date,record.startTime,record.endTime,record.totalDistanc,record.totalTime]];
-    if(!isSuccess)return false;
+    if(!isSuccess)return nil;
   
     for (CLLocation *location in array) {
          isSuccess = [DYFMDBManager executeUpdateWithSql:[NSString stringWithFormat: @"insert into LocationTable (date, startTime , longitude ,latitude ) values ('%@','%@','%lf',%lf)",record.date,record.startTime,location.coordinate.longitude,location.coordinate.latitude]];
-        if(!isSuccess)return false;
+        if(!isSuccess)return nil;
     }
     
-    return YES;
+    return record;
 }
 
 

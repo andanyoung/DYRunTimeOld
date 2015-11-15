@@ -13,31 +13,16 @@
 #import <BaiduMapAPI_Base/BMKBaseComponent.h>//引入base相关所有的头文件
 #import <BaiduMapAPI_Map/BMKMapComponent.h>//引入地图功能所有的头文件
 
-#import "CYLTabBarController.h"
-#import "DYMainViewController.h"
-#import "DYNewsViewController.h"
-
-//#import "DYRecordView.h"
-
+#import "CYLTabBarControllerConfig.h"
 
 BMKMapManager* _mapManager;
 
 @interface AppDelegate ()
-//{
-//    UIBackgroundTaskIdentifier bgtask;
-//}
+
 
 @end
 
 @implementation AppDelegate
-
-//- (DYLocationManager *)locationManager{
-//    if (!_locationManager) {
-//        _locationManager = [DYLocationManager shareLocationManager];
-//    }
-//    return _locationManager;
-//}
-
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -48,13 +33,15 @@ BMKMapManager* _mapManager;
     [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
     [[DDTTYLogger sharedInstance] setForegroundColor:[UIColor blueColor] backgroundColor:nil forFlag:DDLogFlagInfo];
     
-
+    DDLogVerbose(@"didFinishLanching");
     // 设置主窗口,并设置跟控制器
     
+    // 设置主窗口,并设置跟控制器
     self.window = [[UIWindow alloc]init];
     self.window.frame = [UIScreen mainScreen].bounds;
-    [self setupViewControllers];
-    [self.window setRootViewController:self.tabBarController];
+    CYLTabBarControllerConfig *tabBarControllerConfig = [[CYLTabBarControllerConfig alloc] init];
+    _tabBarController = tabBarControllerConfig.tabBarController;
+    [self.window setRootViewController:_tabBarController];
     [self.window makeKeyAndVisible];
     [self customizeInterface];
     
@@ -67,75 +54,16 @@ BMKMapManager* _mapManager;
         DDLogError(@"manager start failed!");
     }
     
- 
-    
-    
-    
     return YES;
 }
 
 /**
  *  配置vc
  */
-- (void)setupViewControllers{
-    DYMainViewController *mianViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"main"];
-    UINavigationController *firstNavigationController = [[UINavigationController alloc]initWithRootViewController:mianViewController];
-    
-    DYNewsViewController *newsViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"news"];
-    UIViewController *secondNavigationController = [[UINavigationController alloc]initWithRootViewController:newsViewController];
-    
-    
-    CYLTabBarController *tabBarController = [CYLTabBarController new];
-    
-    [self customizeTabBarForController:tabBarController];
-    
-    [tabBarController setViewControllers:@[
-                                           firstNavigationController,
-                                           secondNavigationController
-                                           ]];
-    self.tabBarController = tabBarController;
-}
-
-
-
-
-/*
- *
- 在`-setViewControllers:`之前设置TabBar的属性，
- *
- */
-- (void)customizeTabBarForController:(CYLTabBarController *)tabBarController {
-    
-    NSDictionary *dict1 = @{
-                            CYLTabBarItemTitle : @"首页",
-                            CYLTabBarItemImage : @"home_normal",
-                            CYLTabBarItemSelectedImage : @"home_highlight",
-                            };
-//    NSDictionary *dict2 = @{
-//                            CYLTabBarItemTitle : @"同城",
-//                            CYLTabBarItemImage : @"mycity_normal",
-//                            CYLTabBarItemSelectedImage : @"mycity_highlight",
-//                            };
-//    NSDictionary *dict3 = @{
-//                            CYLTabBarItemTitle : @"消息",
-//                            CYLTabBarItemImage : @"message_normal",
-//                            CYLTabBarItemSelectedImage : @"message_highlight",
-//                            };
-    NSDictionary *dict4 = @{
-                            CYLTabBarItemTitle : @"我的",
-                            CYLTabBarItemImage : @"account_normal",
-                            CYLTabBarItemSelectedImage : @"account_highlight"
-                            };
-    NSArray *tabBarItemsAttributes = @[ dict1,
-                                        dict4
-                                        ];
-    tabBarController.tabBarItemsAttributes = tabBarItemsAttributes;
-}
-
 - (void)customizeInterface {
     [self setUpNavigationBarAppearance];
-    [self setUpTabBarItemTextAttributes];
 }
+
 /**
  *  设置navigationBar样式
  */
@@ -165,34 +93,9 @@ BMKMapManager* _mapManager;
 #endif
     }
     
-    [navigationBarAppearance setBackgroundImage:backgroundImage forBarMetrics:UIBarMetricsDefault];
-    //[navigationBarAppearance setBackgroundColor:[UIColor lightGrayColor]];
+    [navigationBarAppearance setBackgroundImage:backgroundImage
+                                  forBarMetrics:UIBarMetricsDefault];
     [navigationBarAppearance setTitleTextAttributes:textAttributes];
-}
-
-/**
- *  tabBarItem 的选中和不选中文字属性
- */
-- (void)setUpTabBarItemTextAttributes {
-    
-    // 普通状态下的文字属性
-    NSMutableDictionary *normalAttrs = [NSMutableDictionary dictionary];
-    normalAttrs[NSForegroundColorAttributeName] = [UIColor grayColor];
-    
-    // 选中状态下的文字属性
-    NSMutableDictionary *selectedAttrs = [NSMutableDictionary dictionary];
-    selectedAttrs[NSForegroundColorAttributeName] = [UIColor darkGrayColor];
-    
-    // 设置文字属性
-    UITabBarItem *tabBar = [UITabBarItem appearance];
-    [tabBar setTitleTextAttributes:normalAttrs forState:UIControlStateNormal];
-    [tabBar setTitleTextAttributes:normalAttrs forState:UIControlStateHighlighted];
-    
-    // 设置背景图片
-   // UITabBar *tabBarAppearance = [UITabBar appearance];
-    
-    // [tabBarAppearance setBackgroundImage:[UIImage imageNamed:@"tabbar_background_os7"]];
-  
 }
 
 #pragma mark - UIApplicationDelegate
@@ -227,8 +130,13 @@ BMKMapManager* _mapManager;
         // 设置主窗口,并设置跟控制器
         [self.window setRootViewController:self.tabBarController];
        // [self.window makeKeyAndVisible];
-        [[DYLocationManager shareLocationManager] startUpdatingLocation];
-         }
+        DYLocationManager *locationManager = [DYLocationManager shareLocationManager];
+        self.tabBarController.selectedIndex = 1;
+        if (!locationManager.running) {
+            locationManager.delegate = ((UINavigationController *)self.tabBarController.selectedViewController).viewControllers[0];
+            [locationManager startUpdatingLocation];
+        }
+     }
 }
 
 @end

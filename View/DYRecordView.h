@@ -14,6 +14,9 @@
 @property (nonatomic,strong) UILabel *speedLB;
 @property (nonatomic)NSInteger timerNumber;
 @property (nonatomic, strong) NSTimer *timer;
+
+/** 重置记录 */
+- (void)resetRecord;
 /**
  *  开启计时器，更新界面的定时器
  */

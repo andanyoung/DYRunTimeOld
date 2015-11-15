@@ -57,7 +57,13 @@ static BMKLocationService *locationService;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
           //  [[[UIAlertView alloc]bk_initWithTitle:@"提示,定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。"] show];
-            [UIAlertView bk_showAlertViewWithTitle:@"提示:定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。" cancelButtonTitle:@"确定" otherButtonTitles:nil handler:nil];
+         
+    
+            UIAlertView *alert = [UIAlertView bk_showAlertViewWithTitle:@"提示:定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。" cancelButtonTitle:@"确定" otherButtonTitles:nil handler:nil] ;
+            //自动关闭 UIAlertView
+            [NSTimer bk_scheduledTimerWithTimeInterval:3 block:^(NSTimer *timer) {
+                [alert dismissWithClickedButtonIndex:0 animated:YES];
+            } repeats:NO];
         });
        
         if(_running)return;
@@ -89,7 +95,7 @@ static BMKLocationService *locationService;
 }
 
 - (void)startUpdatingLocation{
-
+    DDLogInfo(@"startUpdatingLocation");
     
 #warning 先试着用全局变量保存，看是不是可以在后台一直运行
     if (locationService == nil) {
@@ -106,7 +112,9 @@ static BMKLocationService *locationService;
     if ([self.delegate respondsToSelector:@selector(locationManage: didChangeUpdateLocationState:)]){
         [self.delegate locationManage:self didChangeUpdateLocationState:_running];
     }
+    [self.locations removeAllObjects ];
     [locationService startUserLocationService];
+    _startLocationDate = [NSDate new]; 
 
 }
 
@@ -115,14 +123,20 @@ static BMKLocationService *locationService;
 //}
 
 - (void)stopUpdatingLocation{
+    DDLogInfo(@"stopUpdatingLocation");
     
     [locationService stopUserLocationService];
     locationService = nil;
     _running = false;
+
     if ([self.delegate respondsToSelector:@selector(locationManage: didChangeUpdateLocationState:)]){
         [self.delegate locationManage:self didChangeUpdateLocationState:_running];
     }
    
 }
 
+
+- (void)dealloc{
+    DDLogError(@"locationManager is dealloc");
+}
 @end

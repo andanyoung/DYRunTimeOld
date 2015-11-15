@@ -13,6 +13,11 @@
 #import "DYFMDBManager.h"
 #import "DYRunRecord.h"
 #import "DYRunRecordCell.h"
+#import <Masonry.h>
+
+#define minSaveCount  2
+#define removeObjectsLen 20
+#define tableHeaderViewHeight 250
 
 @interface DYMainViewController ()<DYLocationManagerDelegate,UIViewControllerPreviewingDelegate,UIViewControllerPreviewing>
 
@@ -20,18 +25,44 @@
 @property (nonatomic,strong) DYRecordView *tableHeaderView;
 //@property (nonatomic,weak) NSArray <CLLocation *> *locations;
 @property (nonatomic,strong) DYLocationManager *locationManager;
-@property (nonatomic, strong) NSArray *allDates;
+@property (nonatomic, strong) NSMutableArray *allDates;
+
+@property (nonatomic,weak) UILabel *distanceLB;
+@property (nonatomic,weak) UILabel *timeLB;
+@property (nonatomic,weak) UILabel *speedLB;
 @end
 
 @implementation DYMainViewController
 
-- (NSArray *)allDates{
+- (NSMutableArray *)allDates{
     if (!_allDates) {
         _allDates = [DYFMDBManager getAllListLocations];
     }
     return _allDates;
 }
 
+/** 当添加/删除单元格时， 为了不取数据库里读数据（节约内存和时间），直接修改内存上的数据 */
+- (void) refreshDataForTableViewWith:(id)object withSection:(NSInteger)section{
+    if (![object isMemberOfClass:[DYRunRecord class]]) {
+        NSAssert1(NO, @"%s:传入的id参数应为DYRunRecord类型", __FUNCTION__);
+    }
+  
+    if (section != -1) {
+            [_allDates[section] removeObject:object];
+       
+    }else{
+        NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+        [dateFormatter setDateFormat:@"yyyy-MM-dd"];
+        NSString *todatStr = [dateFormatter stringFromDate:[NSDate new]];
+        if ([((DYRunRecord *)_allDates[0][0]).date isEqualToString:todatStr]) {
+            [_allDates[0] addObject:object];
+        }else{
+            [self.allDates addObject:[NSArray arrayWithObjects:[NSArray arrayWithObject:object], nil]];
+        }
+        
+    }
+    //[self.tableView reloadData];
+}
 
 - (DYLocationManager *)locationManager{
     if (_locationManager == nil) {
@@ -40,30 +71,46 @@
     return _locationManager;
 }
 
+
+- (DYRecordView *)tableHeaderView{
+    if (!_tableHeaderView){
+        _tableHeaderView = [[DYRecordView alloc]initWithFrame:CGRectMake(0, 0, kWindowW, 250)];
+        [self.tableHeaderView setBackgroundColor:[UIColor colorWithRed:0.97 green:0.97 blue:0.97 alpha:0.79]];
+        //重构代码
+        /** 为了在更新数据是减少getter方法的读取次数 */
+        _speedLB = _tableHeaderView.speedLB;
+        _timeLB = _tableHeaderView.timeLB;
+        _distanceLB = _tableHeaderView.distanceLB;
+    }
+    return _tableHeaderView;
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    _tableHeaderView = [[DYRecordView alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 250)];
-    [_tableHeaderView setBackgroundColor:[UIColor colorWithRed:0.97 green:0.97 blue:0.97 alpha:0.79]];
-    self.tableView.tableHeaderView = _tableHeaderView;
-
-    
+    DDLogVerbose(@"viewDidLoad");
+    self.tableView.tableHeaderView = self.tableHeaderView;
     self.title = @"RunTime";
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     [button setBackgroundImage:[UIImage imageNamed:@"activity_location"] forState:UIControlStateNormal];
     button.frame = CGRectMake(0, 0, 28, 40);
     [button bk_addEventHandler:^(id sender) {
+        
         MapViewController *mapVc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
 
             mapVc.locations = [NSMutableArray arrayWithArray:self.locationManager.locations];
             mapVc.type = self.locationManager.running;
         [self presentViewController:mapVc animated:YES completion:nil];
+        
     } forControlEvents:UIControlEventTouchUpInside];
     UIBarButtonItem *item = [[UIBarButtonItem alloc]initWithCustomView:button];
     self.navigationItem.rightBarButtonItem = item;
     
-    [self registerForPreviewingWithDelegate:self sourceView:self.tableView];
+    if ([UIDevice currentDevice].systemVersion.doubleValue >= 9.0) {//适配9.0以下
+        [self registerForPreviewingWithDelegate:self sourceView:self.tableView];
+    }
+    
     
    
 }
@@ -72,7 +119,7 @@
 - (void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     [DYLocationManager shareLocationManager].delegate = self;
-    
+    //开启定时器
     [self continueTimer];
 
 }
@@ -81,19 +128,22 @@
     [DYLocationManager shareLocationManager].delegate = nil;
     [super viewWillDisappear:animated];
     DDLogInfo(@"viewWillDisappear");
+    //暂定定时器
     [self stopTimer];
 }
 
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+    //内存警告时，移除内存大的
+    NSRange range = NSMakeRange(0, removeObjectsLen);
+    [_locationManager.locations removeObjectsInRange:range];
 }
 
 #pragma mark - DYLocationManagerDelegate
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
-    _tableHeaderView.distanceLB.text = [NSString stringWithFormat:@"%05.2lf", manager.totalDistanc/1000.0];
-    _tableHeaderView.speedLB.text = [NSString stringWithFormat:@"%05.2lf",manager.speed>0?manager.speed:0];
+    _distanceLB.text = [NSString stringWithFormat:@"%05.2lf", manager.totalDistanc/1000.0];
+    _speedLB.text = [NSString stringWithFormat:@"%05.2lf",manager.speed>0?manager.speed:0];
     //_locations = locations;
 }
 
@@ -112,14 +162,24 @@
     }else{
         [self.tableHeaderView stopTimer];
         
-        if( [DYFMDBManager saveLocations]){
-            [manager.locations removeAllObjects];
+        //保存记录
+        DYRunRecord *record;
+        [self showProgress];
+        if (self.locationManager.locations.count < minSaveCount) {
+            [self showErrorMsg:@"运动距离太短，保存失败"];
+            [self.tableHeaderView resetRecord];
+            return;
+        }else if( ( record = [DYFMDBManager saveLocations])){
+
+            
+            [self refreshDataForTableViewWith:record withSection:-1];
             [self showSuccessMsg:@"保存成功"];
+            [self.tableView reloadData];
         }else{
             [self showErrorMsg:@"保存失败"];
         }
-        self.allDates = [DYFMDBManager getAllListLocations];
-        [self.tableView reloadData];
+        [self hideProgress];
+       
         
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillEnterForegroundNotification object:nil];
         [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -128,12 +188,14 @@
 
 /** 当返回这个页面时，继续计时器 */
 - (void)continueTimer{
-    [_tableHeaderView.timer setFireDate:[NSDate distantPast]];//开启定时器
     
-    NSArray<CLLocation *> *array = _locationManager.locations;
-    if (array.count<2||array == nil) return ;
-    NSTimeInterval timeInterval = [[array lastObject].timestamp timeIntervalSinceDate:[array firstObject].timestamp];
-    _tableHeaderView.timerNumber = (NSInteger)timeInterval;
+    
+    if (_locationManager.running) {
+        [_tableHeaderView.timer setFireDate:[NSDate distantPast]];//开启定时器
+        NSDate *nowDate = [[NSDate alloc]init];
+        NSTimeInterval timeInterval = [nowDate timeIntervalSinceDate:_locationManager.startLocationDate];
+        _tableHeaderView.timerNumber = (NSInteger)timeInterval;
+    }
 
 }
 /** 当退出这个页面时，停止计时器 */
@@ -184,7 +246,7 @@ kRemoveCellSeparator
         return;//当正在计时跑步时，不该进入
     }
     NSArray *arr = self.allDates[indexPath.section];
-    DYRunRecord *record = arr[indexPath.row];
+    DYRunRecord *record = arr[arr.count - indexPath.row - 1];
     MapViewController * mapVC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
     mapVC.type = MapViewTypeQueryDetail;
     mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime ];
@@ -229,8 +291,7 @@ kRemoveCellSeparator
                     NSArray *arr = self.allDates[indexPath.section];
                     DYRunRecord *record = arr[indexPath.row];
                     if([DYFMDBManager deleteRecordsWithDate:record.date andStartTime:record.startTime]){
-                        _allDates = [DYFMDBManager getAllListLocations];
-                        [tableView beginUpdates];
+                        [self refreshDataForTableViewWith:record withSection:indexPath.section];
                         
                         if ([tableView numberOfRowsInSection:indexPath.section] == 1) {
                             
@@ -253,22 +314,33 @@ kRemoveCellSeparator
 #pragma mark - previewing Delegate
 - (UIViewController *)previewingContext:(id<UIViewControllerPreviewing>)previewingContext viewControllerForLocation:(CGPoint)location{
     
+    
+    if (self.locationManager.running){
+        [self showErrorMsg:@"正在计时，不能进入详情页面"];
+        return nil;//当正在计时跑步时，不该进入
+    }
     //转化坐标
     // CGPoint point = [_tableView convertPoint:location fromView:self.view];
     //通过当前坐标得到当前cell和indexPath
     NSIndexPath *indexPath = [self.tableView indexPathForRowAtPoint:location];
-   //DYRunRecordCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    //当触碰的不是cell是indexPath = nil
+    if (indexPath == nil) {
+        return nil;
+    }
+    //DYRunRecordCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
     
     NSArray *arr = self.allDates[indexPath.section];
-    DYRunRecord *record = arr[indexPath.row];
+    DYRunRecord *record = arr[arr.count - indexPath.row - 1];
     MapViewController * mapVC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
     mapVC.type = MapViewTypeQueryDetail;
-    mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime ];
+    mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
     if (mapVC.locations == nil || mapVC.locations.count == 0) {
-        //        [[UIAlertView bk_showAlertViewWithTitle:@"提示" message:@"找不到相关信息" cancelButtonTitle:@"OK!" otherButtonTitles:nil handler:nil] show];
+
         [self showErrorMsg:@"找不到相关信息"];
+        return nil;
         
     }
+    //自定义peek大小
      //dvc.preferredContentSize = CGSizeMake(200.0f,300.0f);
     
     //    CGRect rect = CGRectMake(10, location.y - 10, self.view.frame.size.width - 20,20);

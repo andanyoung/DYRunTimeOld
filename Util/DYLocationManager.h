@@ -38,6 +38,9 @@
 @property (nonatomic) double speed;
 /** 是否是运动记录 */
 @property (nonatomic,getter=isRunning) BOOL running;
+/** 定位开始时间 */
+@property (nonatomic, strong) NSDate *startLocationDate;
+
 + (DYLocationManager *)shareLocationManager;
 /**
  * 开始定位
