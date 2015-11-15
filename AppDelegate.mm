@@ -50,6 +50,7 @@ BMKMapManager* _mapManager;
     
 
     // 设置主窗口,并设置跟控制器
+    
     self.window = [[UIWindow alloc]init];
     self.window.frame = [UIScreen mainScreen].bounds;
     [self setupViewControllers];
@@ -66,14 +67,7 @@ BMKMapManager* _mapManager;
         DDLogError(@"manager start failed!");
     }
     
-    //_locationManager = [DYLocationManager shareLocationManager];
-    //self.locationManager.locationService.activityType = CLActivityTypeFitness;
-    //    _locationManager.locationService.desiredAccuracy = kCLLocationAccuracyBest;
-    //    _locationManager.locationService.distanceFilter = 5.0;
-    //    _locationManager.locationService.pausesLocationUpdatesAutomatically = NO;
-    //    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 9) {
-    //         _locationManager.locationService.allowsBackgroundLocationUpdates = YES;
-    //    }
+ 
     
     
     
@@ -209,25 +203,7 @@ BMKMapManager* _mapManager;
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
-    /**
-     *  app的状态
-     *  1.死亡状态：没有打开app
-     *  2.前台运行状态
-     *  3.后台暂停状态：停止一切动画、定时器、多媒体、联网操作，很难再作其他操作
-     *  4.后台运行状态
-     */
-    // 向操作系统申请后台运行的资格，能维持多久，是不确定的
-//     bgtask = [application beginBackgroundTaskWithExpirationHandler:^{
-//        // 当申请的后台运行时间已经结束（过期），就会调用这个block
-//        
-//        // 赶紧结束任务
-//        [application endBackgroundTask:bgtask];
-//        bgtask = UIBackgroundTaskInvalid;
-//    }];
-//    
-    // 在Info.plst中设置后台模式：Required background modes == App plays audio or streams audio/video using AirPlay
-    // 搞一个0kb的MP3文件，没有声音
-    // 循环播放
+ 
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
@@ -241,6 +217,18 @@ BMKMapManager* _mapManager;
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
+}
+
+- (void)application:(UIApplication *)application performActionForShortcutItem:(UIApplicationShortcutItem *)shortcutItem completionHandler:(void (^)(BOOL))completionHandler{
+    //判断先前我们设置的唯一标识
+
+    if([shortcutItem.type isEqualToString: @"com.ady.Runtime.run"]){
+       
+        // 设置主窗口,并设置跟控制器
+        [self.window setRootViewController:self.tabBarController];
+       // [self.window makeKeyAndVisible];
+        [[DYLocationManager shareLocationManager] startUpdatingLocation];
+         }
 }
 
 @end

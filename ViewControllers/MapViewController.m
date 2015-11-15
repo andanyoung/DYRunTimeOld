@@ -11,7 +11,7 @@
 #import "DYLocationManager.h"
 
 #define polylineWith 10.0
-#define polylineColor [UIColor colorWithRed:0.5 green:0.5 blue:1 alpha:0.7]
+#define polylineColor [[UIColor greenColor] colorWithAlphaComponent:1]
 #define mapViewZoomLevel 20
 
 
@@ -21,14 +21,14 @@
 
 
 
-@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate>{
+@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate,UIViewControllerPreviewingDelegate>{
   //  BMKLocationService *_locaService;//由于系统原因，iOS不允许使用第三方定位，因此地图SDK中的定位方法，本质上是对原生定位的二次封装。
 }
 
 //百度地图View
 @property (weak, nonatomic) IBOutlet BMKMapView *mapView;
 @property (nonatomic, strong) BMKPolyline *polyLine;
-//@property (nonatomic, strong) DYLocationManager *locationManager;
+@property (nonatomic, strong) DYLocationManager *locationManager;
 
 @end
 
@@ -38,18 +38,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self showProgress];
-//    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-//    appDelegate.locationManager.delegate = self;
-//    self.locationManager = appDelegate.locationManager;
-    
     //初始化定位
     [self initLocation];
-    
-    if (_locations.count>1) {
-        [self drawWalkPolyline:_locations];
-    }
-    
-    _mapView.delegate = self;
 }
 
 
@@ -57,8 +47,11 @@
     [super viewDidAppear:animated];
     _mapView.delegate = self;
     
-    [self startLocation];
     [_mapView viewWillAppear];
+    if (_type != MapViewTypeQueryDetail) {
+       [self startLocation]; 
+    }
+    
 }
 
 - (void)viewDidDisappear:(BOOL)animated{
@@ -66,58 +59,76 @@
     _mapView.delegate = nil;//不用时，值nil。释放内存
 }
 
-#pragma mark - BMKMapViewDelegate
-- (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
-    [self hideProgress];
-}
 
-#pragma mark -- 初始化定位
+
+#pragma mark -- 初始化地图
 - (void)initLocation{
     
     //配置_mapView 去除蓝色精度框
     BMKLocationViewDisplayParam *displayParam = [BMKLocationViewDisplayParam new];
     displayParam.isRotateAngleValid = true;//跟随态旋转角度是否生效
     displayParam.isAccuracyCircleShow = false;//精度圈是否显示
-    //displayParam.locationViewImgName= @"icon";//定位图标名称
     displayParam.locationViewOffsetX = 0;//定位偏移量(经度)
     displayParam.locationViewOffsetY = 0;//定位偏移量（纬度）
+    displayParam.locationViewImgName = @"walk";//定位图标名称
     [_mapView updateLocationViewWithParam:displayParam];
     
     _mapView.zoomLevel = 20;
     _mapView.showMapScaleBar = YES;
 
+    _mapView.delegate = self;
+    
+    if (  _type != MapViewTypeLocation && _locations.count>1 ) {
+        CLLocation *location = [_locations lastObject];
+        
+        [_mapView setCenterCoordinate:location.coordinate animated:YES];
+        
+        
+        BMKUserLocation *userLocation = [BMKUserLocation new];
+        [userLocation setValue:location forKey:@"location"];
+        [userLocation setValue:@"YES" forKey:@"updating"];
+        [_mapView updateLocationData:userLocation];
+        [self drawWalkPolyline:_locations];
+        
+        [self mapViewFitPolyLine:_polyLine];
+    }
+   
 }
 
 /** 开始定位 */
 - (void)startLocation{
     
-    [DYLocationManager shareLocationManager].delegate = self;
+     _locationManager = [DYLocationManager shareLocationManager];
+    _locationManager.delegate = self;
+    [_locationManager startUpdatingLocation];
     
-    //[_mapView setShowsUserLocation:YES];//开始定位
-   // [_locationManager startUpdatingLocation];
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
     _mapView.showsUserLocation = YES;//显示定位图层,开始定位
 }
 
 
+#pragma mark - BMKMapViewDelegate
+- (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
+    [self hideProgress];
+}
 
 #pragma mark -- DYLocationManagerDelegate
 
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
-   // NSLog(@"delegate");
     CLLocation *location = [locations lastObject];
     
     [_mapView setCenterCoordinate:location.coordinate animated:YES];
-    
-    
     BMKUserLocation *userLocation = [BMKUserLocation new];
     [userLocation setValue:location forKey:@"location"];
     [userLocation setValue:@"YES" forKey:@"updating"];
     [_mapView updateLocationData:userLocation];
     
+    if(_type == MapViewTypeLocation){
+         [_locationManager stopUpdatingLocation];
+        return;
+    }
     [self drawWalkPolyline:locations];
-    
     
 }
 
@@ -190,7 +201,8 @@
     rect.origin = BMKMapPointMake(ltX , ltY);
     rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
     [self.mapView setVisibleMapRect:rect];
-    self.mapView.zoomLevel = self.mapView.zoomLevel - 0.3;
+    //self.mapView setRegion:BMKCoordinateRegionMake(<#CLLocationCoordinate2D centerCoordinate#>, <#BMKCoordinateSpan span#>)
+    //self.mapView.zoomLevel = self.mapView.zoomLevel - 0.3;
 }
 
 
@@ -199,15 +211,45 @@
 - (BMKOverlayView *)mapView:(BMKMapView *)mapView viewForOverlay:(id <BMKOverlay>)overlay{
     if ([overlay isKindOfClass:[BMKPolyline class]]){
         BMKPolylineView* polylineView = [[BMKPolylineView alloc] initWithOverlay:overlay];
-        polylineView.strokeColor = [UIColor colorWithRed:0.5 green:0.5 blue:1 alpha:0.7];
+        polylineView.strokeColor = polylineColor;
         polylineView.lineWidth = polylineWith;
-      
+        polylineView.fillColor = [[UIColor clearColor] colorWithAlphaComponent:0.7];
         return polylineView;
     }
     return nil;
 }
 - (void)didFailToLocateUserWithError:(NSError *)error{
     DDLogError(@"error:%@",error);
+}
+
+/**
+ *  只有在添加大头针的时候会调用，直接在viewDidload中不会调用
+ *  根据anntation生成对应的View
+ *  @param mapView 地图View
+ *  @param annotation 指定的标注
+ *  @return 生成的标注View
+ */
+- (BMKAnnotationView *)mapView:(BMKMapView *)mapView viewForAnnotation:(id <BMKAnnotation>)annotation
+{
+    if ([annotation isKindOfClass:[BMKPointAnnotation class]]) {
+        BMKPinAnnotationView *annotationView = [[BMKPinAnnotationView alloc]initWithAnnotation:annotation reuseIdentifier:@"myAnnotation"];
+        if(_locations.count == 1){ // 有起点旗帜代表应该放置终点旗帜（程序一个循环只放两张旗帜：起点与终点）
+            annotationView.pinColor = BMKPinAnnotationColorGreen; // 替换资源包内的图片
+           
+        }else { // 没有起点旗帜，应放置起点旗帜
+            annotationView.pinColor = BMKPinAnnotationColorPurple;
+
+        }
+        
+        // 从天上掉下效果
+        annotationView.animatesDrop = YES;
+        
+        // 不可拖拽
+        annotationView.draggable = NO;
+        
+        return annotationView;
+    }
+    return nil;
 }
 
 /**
@@ -230,6 +272,28 @@
 
 
 - (IBAction)quitMap:(id)sender {
+//    if (!self.isRunning) {//不是run
+//        [_locationManager stopUpdatingLocation];
+//    }
     [self dismissModalViewControllerAnimated:YES];
 }
+
+//底部预览界面选项
+- (NSArray<id<UIPreviewActionItem>> *)previewActionItems{
+    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"action1" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
+        NSLog(@"action1 %@",previewViewController);
+    }];
+    
+    UIPreviewAction *action2 = [UIPreviewAction actionWithTitle:@"action2" style:UIPreviewActionStyleDestructive handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
+        NSLog(@"action2 %@",previewViewController);
+    }];
+    
+    UIPreviewAction *action3 = [UIPreviewAction actionWithTitle:@"action2" style:UIPreviewActionStyleSelected handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
+        NSLog(@"action3 %@",previewViewController);
+    }];
+    
+    return @[action1,action2,action3];
+}
+
+
 @end

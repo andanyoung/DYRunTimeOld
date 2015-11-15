@@ -37,4 +37,8 @@
  *  返回所有的数据
  */
 + (NSArray *)getAllListLocations;
+
++ (NSArray *)getLocationsWithDate:(NSString *)date andStartTime:(NSString *)startTime;
+
++ (BOOL)deleteRecordsWithDate:(NSString *)date andStartTime:(NSString *)startTime;
 @end

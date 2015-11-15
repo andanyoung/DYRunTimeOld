@@ -34,9 +34,16 @@
             NSString *sqlCreateTable =  @"CREATE TABLE IF NOT EXISTS RecordTable (date TEXT, startTime text, endTime TEXT,totalDistanc TEXT,totalTime Text)";
             BOOL res = [db executeUpdate:sqlCreateTable];
             if (!res) {
-                DDLogError(@"error when creating db table");
+                DDLogError(@"error when creating db RecordTable");
             } else {
-                DDLogInfo(@"success to creating db table");
+                DDLogInfo(@"success to creating db RecordTable");
+            }
+            sqlCreateTable =  @"CREATE TABLE IF NOT EXISTS LocationTable ( date Text, startTime Text, longitude TEXT,latitude TEXT)";
+            res = [db executeUpdate:sqlCreateTable];
+            if (!res) {
+                DDLogError(@"error when creating db LocationTable");
+            } else {
+                DDLogInfo(@"success to creating db LocationTable");
             }
             [db close];
         }
@@ -62,17 +69,7 @@
     return NO;
 }
 
-//+ (NSArray *)executeQueryWithSql:(NSString *)sql{
-//    FMDatabase *db = [self defaultDatabase];
-//    if ([db open]) {
-//        FMResultSet *rs = [db executeQuery:sql];
-//       // NSArray *arr = [self resToList:rs];
-//        [db close];
-//        return arr;
-//    }
-//    
-//    return nil;
-//}
+
 
 + (NSArray *)resToList:(FMResultSet *)rs{
     NSMutableArray *arr = [NSMutableArray new];
@@ -98,6 +95,29 @@
     }
     
     return [arr copy];
+}
+
++ (BOOL)deleteRecordsWithDate:(NSString *)date andStartTime:(NSString *)startTime{
+    return  [self executeUpdateWithSql:[NSString stringWithFormat:@"delete  from RecordTable where  date = '%@' and startTime = '%@'",date,startTime]];
+
+}
+
++ (NSArray *)getLocationsWithDate:(NSString *)date andStartTime:(NSString *)startTime{
+    FMDatabase *db = [self defaultDatabase];
+    if ([db open]) {
+        
+        FMResultSet *rs = [db executeQuery:[NSString stringWithFormat: @"select * from LocationTable where date = '%@' and startTime = '%@' ",date,startTime]];
+        NSMutableArray<CLLocation *> *array =  [NSMutableArray new];
+        while ([rs next]) {
+            CLLocation *location = [[CLLocation alloc]initWithLatitude:[rs stringForColumn:@"latitude"].doubleValue longitude:[rs stringForColumn:@"longitude"].doubleValue];
+            [array addObject:location];
+        }
+        [db closeOpenResultSets];
+        [db close];
+        return [array copy];
+    }
+    
+    return nil;
 }
 
 + (NSArray *)getAllListLocations{
@@ -126,15 +146,21 @@
     record.startTime = [dateFormatter stringFromDate: [array firstObject].timestamp];
     record.endTime = [dateFormatter stringFromDate: [array lastObject].timestamp];
     record.totalDistanc = [NSString stringWithFormat:@"%.2lf" ,locationManage.totalDistanc ];
-    record.totalTime = [NSString stringWithFormat:@"%ld:%ld",(NSInteger)timeInterval/60,(NSInteger)timeInterval%60];
+    record.totalTime = [NSString stringWithFormat:@"%02ld:%02ld",(NSInteger)timeInterval/60,(NSInteger)timeInterval%60];
     [dateFormatter setDateFormat:@"yyyy-MM-dd"];
     record.date = [dateFormatter stringFromDate:[array firstObject].timestamp];
    
+#warning 暂时先这么写吧，以后加上事务回滚
     if (record.date == nil) return false;
-    return [DYFMDBManager executeUpdateWithSql: [NSString stringWithFormat: @"insert into RecordTable (date ,startTime ,endTime ,totalDistanc ,totalTime) values ('%@','%@','%@','%@','%@')",record.date,record.startTime,record.endTime,record.totalDistanc,record.totalTime]];
-    
+    BOOL isSuccess = [DYFMDBManager executeUpdateWithSql: [NSString stringWithFormat: @"insert into RecordTable (date ,startTime ,endTime ,totalDistanc ,totalTime) values ('%@','%@','%@','%@','%@')",record.date,record.startTime,record.endTime,record.totalDistanc,record.totalTime]];
+    if(!isSuccess)return false;
   
+    for (CLLocation *location in array) {
+         isSuccess = [DYFMDBManager executeUpdateWithSql:[NSString stringWithFormat: @"insert into LocationTable (date, startTime , longitude ,latitude ) values ('%@','%@','%lf',%lf)",record.date,record.startTime,location.coordinate.longitude,location.coordinate.latitude]];
+        if(!isSuccess)return false;
+    }
     
+    return YES;
 }
 
 

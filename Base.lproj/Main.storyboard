@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9059" systemVersion="15A284" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Cqq-J0-lnV">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9049"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
@@ -35,7 +35,7 @@
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="Cell" id="Lhp-92-8Dp" customClass="DYRunRecordCell">
-                                <rect key="frame" x="0.0" y="50" width="600" height="44"/>
+                                <rect key="frame" x="0.0" y="114" width="600" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Lhp-92-8Dp" id="UAw-Q8-kC3">
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -50,10 +50,11 @@
                             <outlet property="delegate" destination="Cjh-bq-YYH" id="lA0-U4-v1r"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="XMx-KY-SCG"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sic-p5-wDf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="136" y="281"/>
+            <point key="canvasLocation" x="948" y="281"/>
         </scene>
         <!--Map View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -79,7 +80,7 @@
                                     <constraint firstAttribute="height" constant="66" id="Xxn-m5-rZd"/>
                                     <constraint firstAttribute="width" constant="66" id="rM3-zB-v4C"/>
                                 </constraints>
-                                <state key="normal" backgroundImage="abc_ic_clear_normal"/>
+                                <state key="normal" image="cancel_button" backgroundImage="bg_avatar_default"/>
                                 <state key="highlighted" backgroundImage="abc_ic_clear_disabled"/>
                                 <connections>
                                     <action selector="quitMap:" destination="BYZ-38-t0r" eventType="touchUpInside" id="9fV-fP-fU2"/>
@@ -115,11 +116,31 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="901" y="275"/>
+            <point key="canvasLocation" x="1713" y="275"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="OVy-HH-SJg">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="Cqq-J0-lnV" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="9tg-xG-Juf">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <animations/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="Cjh-bq-YYH" kind="relationship" relationship="rootViewController" id="PJR-UV-W0B"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="crq-bA-Eec" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="136" y="281"/>
         </scene>
     </scenes>
     <resources>
         <image name="abc_ic_clear_disabled" width="32" height="32"/>
-        <image name="abc_ic_clear_normal" width="32" height="32"/>
+        <image name="bg_avatar_default" width="32" height="32"/>
+        <image name="cancel_button" width="60" height="60"/>
     </resources>
 </document>

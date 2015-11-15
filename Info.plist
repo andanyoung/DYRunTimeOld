@@ -31,6 +31,17 @@
 	</dict>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>I need all GPS</string>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconType</key>
+			<string>UIApplicationShortcutIconTypeAdd</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>start run</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>com.ady.Runtime.run</string>
+		</dict>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

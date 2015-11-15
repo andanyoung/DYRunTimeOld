@@ -118,6 +118,7 @@
     [_timer invalidate];
     _timer = nil;
     _timerNumber = 0;
+    
 }
 
 - (void)chanageTimeValue{
@@ -125,4 +126,6 @@
     _timeLB.text = [NSString stringWithFormat:@"%.2ld:%.2ld", _timerNumber/60 ,_timerNumber%60];
     DDLogVerbose(@"%@",_timeLB.text);
 }
+
+
 @end

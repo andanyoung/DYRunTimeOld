@@ -52,18 +52,18 @@ static BMKLocationService *locationService;
     // 如果此时位置更新的水平精准度大于10米，直接返回该方法
     // 可以用来简单判断GPS的信号强度
     //horizontalAccuracy:半径不确定性的中心点，以米为单位。 该地点的纬度和经度确定的圆的圆心，该值表示在该圆的半径。负值表示位置的经度和纬度是无效的。
- //   if (location.horizontalAccuracy<0||location.horizontalAccuracy>20.0) {
+    if (location.horizontalAccuracy<0||location.horizontalAccuracy>20.0) {
         
-//        static dispatch_once_t onceToken;
-//        dispatch_once(&onceToken, ^{
-//             [[[UIAlertView alloc]initWithTitle:@"提示,定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。" delegate:self cancelButtonTitle:@"确定" otherButtonTitles: nil] show];
-//        });
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+          //  [[[UIAlertView alloc]bk_initWithTitle:@"提示,定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。"] show];
+            [UIAlertView bk_showAlertViewWithTitle:@"提示:定位误差较大" message:@"亲，请再室外使用，并尽量避免高大的建筑物。" cancelButtonTitle:@"确定" otherButtonTitles:nil handler:nil];
+        });
        
-        
- //       return;
-//    }
+        if(_running)return;
+    }
 #warning test
-    DDLogInfo(@"dingwei");
+    DDLogInfo(@"dingwei:纬度：%lf,经度：%lf",location.coordinate.latitude,location.coordinate.longitude);
     
     if(self.locations.count>1){
         
@@ -71,9 +71,9 @@ static BMKLocationService *locationService;
         //计算本次定位数据与上一次定位之间的距离
         CGFloat distance = [location distanceFromLocation:[self.locations lastObject]];
         // (5.0米门限值，存储数组画线) 如果距离少于 5.0 米，则忽略本次数据直接返回方法
-//        if (distance < 5.0) {
-//            return;
-//        }
+        if (distance < 5.0) {
+            return;
+        }
         _totalDistanc += distance;
       //  _timestamp = location.timestamp;
         _speed = location.speed;
@@ -89,27 +89,40 @@ static BMKLocationService *locationService;
 }
 
 - (void)startUpdatingLocation{
+
     
-#warning 先试着用全局变量保存，看是不是可以在后台一值运行
+#warning 先试着用全局变量保存，看是不是可以在后台一直运行
     if (locationService == nil) {
         locationService = [BMKLocationService new];
+        locationService.allowsBackgroundLocationUpdates = YES;
+        locationService.desiredAccuracy = kCLLocationAccuracyBest;
+        locationService.pausesLocationUpdatesAutomatically = NO;
         locationService.delegate = self;
     }
     
    // _timerNumber = 0;
     _totalDistanc = 0;
     _running = true;
-    [self.delegate locationManage:self didChangeUpdateLocationState:_running];
+    if ([self.delegate respondsToSelector:@selector(locationManage: didChangeUpdateLocationState:)]){
+        [self.delegate locationManage:self didChangeUpdateLocationState:_running];
+    }
     [locationService startUserLocationService];
-    
+
 }
+
+//- (void)suspendUpdatingLocation{
+//
+//}
 
 - (void)stopUpdatingLocation{
     
     [locationService stopUserLocationService];
     locationService = nil;
     _running = false;
-    [self.delegate locationManage:self didChangeUpdateLocationState:_running];
+    if ([self.delegate respondsToSelector:@selector(locationManage: didChangeUpdateLocationState:)]){
+        [self.delegate locationManage:self didChangeUpdateLocationState:_running];
+    }
+   
 }
 
 @end
