@@ -11,6 +11,7 @@
 #import "DYLocationManager.h"
 #import "DYRunRecord.h"
 #import "DYFMDBManager.h"
+#import "DYMainViewController.h"
 
 #define polylineWith 10.0
 #define polylineColor [[UIColor greenColor] colorWithAlphaComponent:1]
@@ -84,8 +85,7 @@
         CLLocation *location = [_locations lastObject];
         
         [_mapView setCenterCoordinate:location.coordinate animated:YES];
-        
-        
+
         BMKUserLocation *userLocation = [BMKUserLocation new];
         [userLocation setValue:location forKey:@"location"];
         [userLocation setValue:@"YES" forKey:@"updating"];
@@ -102,8 +102,10 @@
     
      _locationManager = [DYLocationManager shareLocationManager];
     _locationManager.delegate = self;
-    [_locationManager startUpdatingLocation];
-    
+    if (_type == MapViewTypeLocation) {
+        [_locationManager startUpdatingLocation];
+    }
+
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
     _mapView.showsUserLocation = YES;//显示定位图层,开始定位
@@ -176,7 +178,11 @@
  *
  *  @param polyLine
  */
+
+
 - (void)mapViewFitPolyLine:(BMKPolyline *) polyLine {
+    //一个矩形的四边
+    /** ltx: top left x */
     CGFloat ltX, ltY, rbX, rbY;
     if (polyLine.pointCount < 1) {
         return;
@@ -199,12 +205,17 @@
             rbY = pt.y;
         }
     }
+    
+    
     BMKMapRect rect;
     rect.origin = BMKMapPointMake(ltX , ltY);
     rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
     [self.mapView setVisibleMapRect:rect];
-    //self.mapView setRegion:BMKCoordinateRegionMake(<#CLLocationCoordinate2D centerCoordinate#>, <#BMKCoordinateSpan span#>)
-    //self.mapView.zoomLevel = self.mapView.zoomLevel - 0.3;
+    //[self.mapView setRegion: [self.mapView convertRect:[self.mapView convertMapRect:rect toRectToView:self.mapView] toRegionFromView:self.mapView]];
+  //  BMKMapRect r1 = [self.mapView mapRectThatFits:rect];
+    //[self.mapView setCenterCoordinate:CLLocationCoordinate2DMake( (rbX - ltX)/2.0,(rbY - ltY)/2.0) animated:YES];
+    //[self.mapView setRegion:BMKCoordinateRegionMake( CLLocationCoordinate2DMake( (rbY - ltY)/2.0,(rbX - ltX)/2.0), BMKCoordinateSpanMake(rect.size.width/2.0, rect.size.height/2.0))];
+    self.mapView.zoomLevel = self.mapView.zoomLevel - 1;
 }
 
 
@@ -215,7 +226,7 @@
         BMKPolylineView* polylineView = [[BMKPolylineView alloc] initWithOverlay:overlay];
         polylineView.strokeColor = polylineColor;
         polylineView.lineWidth = polylineWith;
-        polylineView.fillColor = [[UIColor clearColor] colorWithAlphaComponent:0.7];
+       // polylineView.fillColor = [[UIColor clearColor] colorWithAlphaComponent:0.7];
         return polylineView;
     }
     return nil;
@@ -279,26 +290,28 @@
 //    if (!self.isRunning) {//不是run
 //        [_locationManager stopUpdatingLocation];
 //    }
-    if (_locationManager.running && _type != MapViewTypeRunning) {
-        [_locationManager stopUpdatingLocation];
-    }
+    
     [self dismissModalViewControllerAnimated:YES];
+    if ( _type == MapViewTypeRunning) return;
+    [_locationManager stopUpdatingLocation];
+    
 }
 
 //底部预览界面选项
 - (NSArray<id<UIPreviewActionItem>> *)previewActionItems{
-    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"查看" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
-        [previewViewController showDetailViewController:self sender:previewViewController];
+    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"查看" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action,UIViewController  * _Nonnull previewViewController) {
+    
     }];
     
     UIPreviewAction *action2 = [UIPreviewAction actionWithTitle:@"删除" style:UIPreviewActionStyleDestructive handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
         
         [[UIAlertView bk_showAlertViewWithTitle:@"删除记录？" message:@"确定要删除此纪录吗？" cancelButtonTitle:@"点错了" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
             if (buttonIndex==1) {
-
-                if([DYFMDBManager deleteRecordsWithDate:[_locations[0] valueForKey:@"date"] andStartTime:[_locations[0] valueForKey:@"startTime"]]){
-                  //  previewViewController
-                }
+            
+//                if([DYFMDBManager deleteRecordsWithDate:[_locations[0] valueForKey:@"date"] andStartTime:[_locations[0] valueForKey:@"startTime"]]){
+//                    DYMainViewController *mainVC = (DYMainViewController *)previewViewController;
+//                   // mainVC refreshDataForTableViewWith:<#(id)#> withSection:NSIndexPath
+//                }
             }
         }] show];
     }];

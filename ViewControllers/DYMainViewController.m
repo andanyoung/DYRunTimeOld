@@ -18,6 +18,7 @@
 #define minSaveCount  2
 #define removeObjectsLen 20
 #define tableHeaderViewHeight 250
+#define rowAnimation UITableViewRowAnimationAutomatic
 
 @interface DYMainViewController ()<DYLocationManagerDelegate,UIViewControllerPreviewingDelegate,UIViewControllerPreviewing>
 
@@ -48,16 +49,46 @@
     }
   
     if (section != -1) {
-            [_allDates[section] removeObject:object];
+        NSMutableArray *arr = _allDates[section];
+        [arr removeObject:object];
+        
+        if (arr.count == 0) {
+            [_allDates removeObject:arr];
+        }
        
     }else{
+        NSIndexSet *indexSet = [[NSIndexSet alloc]initWithIndex:0];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+        if (_allDates.count == 0) {//没有数据时
+            [self.allDates addObject:[NSMutableArray arrayWithObject:object]];
+
+            [self.tableView beginUpdates];
+            //会自动插入一个cell。。。
+            [self.tableView insertSections:indexSet withRowAnimation:rowAnimation];
+           // [self.tableView insertRowsAtIndexPaths:arrInsertRows withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.tableView endUpdates];
+            return;
+        }
+        
         NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
         [dateFormatter setDateFormat:@"yyyy-MM-dd"];
         NSString *todatStr = [dateFormatter stringFromDate:[NSDate new]];
         if ([((DYRunRecord *)_allDates[0][0]).date isEqualToString:todatStr]) {
             [_allDates[0] addObject:object];
+            
+            [self.tableView beginUpdates];
+            [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:rowAnimation];
+            [self.tableView endUpdates];
         }else{
-            [self.allDates addObject:[NSArray arrayWithObjects:[NSArray arrayWithObject:object], nil]];
+            //要将数组插入最前面
+            [self.allDates insertObject:[NSMutableArray arrayWithObject:object] atIndex:0];
+            //[self.allDates addObject:[NSMutableArray arrayWithObject:object]]; error
+            
+            [self.tableView beginUpdates];
+            
+            [self.tableView insertSections:indexSet withRowAnimation:rowAnimation];
+           // [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+            [self.tableView endUpdates];
         }
         
     }
@@ -101,6 +132,7 @@
 
             mapVc.locations = [NSMutableArray arrayWithArray:self.locationManager.locations];
             mapVc.type = self.locationManager.running;
+        
         [self presentViewController:mapVc animated:YES completion:nil];
         
     } forControlEvents:UIControlEventTouchUpInside];
@@ -136,6 +168,7 @@
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     //内存警告时，移除内存大的
+    DDLogError(@"didReceiveMemoryWarning");
     NSRange range = NSMakeRange(0, removeObjectsLen);
     [_locationManager.locations removeObjectsInRange:range];
 }
@@ -174,7 +207,7 @@
             
             [self refreshDataForTableViewWith:record withSection:-1];
             [self showSuccessMsg:@"保存成功"];
-            [self.tableView reloadData];
+          
         }else{
             [self showErrorMsg:@"保存失败"];
         }
@@ -232,7 +265,6 @@
     cell.totalDistancLb.text = [NSString stringWithFormat:@"%@公里",record.totalDistanc];
     cell.totalTimeLb.text = [NSString stringWithFormat:@"%@s",record.totalTime];
     cell.timeLb.text = [NSString stringWithFormat:@"%@ ~ %@",record.startTime,record.endTime];
-    
     return cell;
 }
 
@@ -281,6 +313,7 @@ kRemoveCellSeparator
     return @"删除此记录";
 }
 
+
 //当编辑操作出触发后，做什么
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath{
     if (editingStyle== UITableViewCellEditingStyleDelete) {
@@ -291,11 +324,11 @@ kRemoveCellSeparator
                     NSArray *arr = self.allDates[indexPath.section];
                     DYRunRecord *record = arr[indexPath.row];
                     if([DYFMDBManager deleteRecordsWithDate:record.date andStartTime:record.startTime]){
-                        [self refreshDataForTableViewWith:record withSection:indexPath.section];
                         
+                        [self refreshDataForTableViewWith:record withSection:indexPath.section];
                         if ([tableView numberOfRowsInSection:indexPath.section] == 1) {
                             
-                            [tableView deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:UITableViewRowAnimationFade];
+                            [tableView deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:rowAnimation];
                         } else {
                             [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
                         }
@@ -303,6 +336,8 @@ kRemoveCellSeparator
                         [tableView endUpdates];
 
                     }
+                }else{
+                    [self.tableView endEditing:YES];
                 }
             }] show];
             
@@ -334,7 +369,7 @@ kRemoveCellSeparator
     MapViewController * mapVC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
     mapVC.type = MapViewTypeQueryDetail;
     mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
-    if (mapVC.locations == nil || mapVC.locations.count == 0) {
+    if (mapVC.locations == nil || mapVC.locations.count < 2) {
 
         [self showErrorMsg:@"找不到相关信息"];
         return nil;

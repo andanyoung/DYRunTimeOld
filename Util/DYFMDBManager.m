@@ -84,7 +84,7 @@
         record.totalTime = [rs stringForColumn:@"totalTime"];
         
         if ([record.date isEqualToString:date]) {
-            NSMutableArray *dataArr = [arr lastObject];
+            NSMutableArray<DYRunRecord *> *dataArr = [arr lastObject];
             [dataArr addObject:record];
         }else{
 

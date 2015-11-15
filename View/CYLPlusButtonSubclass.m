@@ -50,7 +50,7 @@
    // CGFloat const centerOfTitleLabel = imageViewEdge  + verticalMargin * 2 + labelLineHeight * 0.5 + 5;
     
     //imageView position 位置
-    self.imageView.bounds = CGRectMake(0, 0, imageViewEdge, imageViewEdge);
+    self.imageView.bounds = CGRectMake(0, 0, imageViewEdge+10, imageViewEdge);
     self.imageView.center = CGPointMake(centerOfView, centerOfImageView);
     
     //title position 位置

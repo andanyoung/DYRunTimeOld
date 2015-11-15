@@ -28,11 +28,11 @@
 - (CYLTabBarController *)tabBarController
 {
     if (_tabBarController == nil) {
-        DYMainViewController *firstViewController = kVCFromSb(@"main", @"Main");
+        DYMainViewController *firstViewController = kVCFromSb(@"news", @"Main");
         UIViewController *firstNavigationController = [[UINavigationController alloc]
                                                        initWithRootViewController:firstViewController];
         
-        DYNewsViewController *secondViewController = kVCFromSb(@"news", @"Main");
+        DYNewsViewController *secondViewController = kVCFromSb(@"main", @"Main");
         UIViewController *secondNavigationController = [[UINavigationController alloc]
                                                         initWithRootViewController:secondViewController];
        
@@ -46,9 +46,8 @@
         [self setUpTabBarItemsAttributesForController:tabBarController];
         
         [tabBarController setViewControllers:@[
-                                               secondNavigationController,
                                                firstNavigationController,
-                                               
+                                               secondNavigationController
 
                                                ]];
         /**

@@ -96,6 +96,9 @@ static BMKLocationService *locationService;
 
 - (void)startUpdatingLocation{
     DDLogInfo(@"startUpdatingLocation");
+    if (_running) {
+        return;//已经在定时
+    }
     
 #warning 先试着用全局变量保存，看是不是可以在后台一直运行
     if (locationService == nil) {
@@ -108,7 +111,7 @@ static BMKLocationService *locationService;
     
    // _timerNumber = 0;
     _totalDistanc = 0;
-    _running = true;
+    _running = YES;
     if ([self.delegate respondsToSelector:@selector(locationManage: didChangeUpdateLocationState:)]){
         [self.delegate locationManage:self didChangeUpdateLocationState:_running];
     }

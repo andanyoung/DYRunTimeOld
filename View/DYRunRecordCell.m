@@ -46,15 +46,14 @@
         _totalTimeLb = [[UILabel alloc] init];
         _totalTimeLb.font = [UIFont systemFontOfSize:15];
         _totalTimeLb.textColor = [UIColor lightGrayColor];
-     //   [self.contentView addSubview:_totalTimeLb];
-//        [_totalTimeLb mas_makeConstraints:^(MASConstraintMaker *make) {
-//            make.centerY.mas_equalTo(0);
-//            make.right.mas_equalTo(-50);
-//            
-//           // make.right.mas_equalTo(self.accessoryView.mas_left).mas_equalTo(-5);
-//        }];
-        _totalTimeLb.frame = CGRectMake(0, 0, 59, 59);
-        self.accessoryView = _totalTimeLb;
+        [self.contentView addSubview:_totalTimeLb];
+        [_totalTimeLb mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.centerY.mas_equalTo(0);
+            make.right.mas_equalTo(-50);
+            
+                  }];
+//        _totalTimeLb.frame = CGRectMake(0, 0, 59, 59);
+//        self.accessoryView = _totalTimeLb;
     
     //NSLog(@"%@",self.accessoryType);
     }
