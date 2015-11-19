@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <CoreLocation/CoreLocation.h>
 
 typedef enum : NSUInteger {
     /** 用于定位 */
@@ -19,7 +20,7 @@ typedef enum : NSUInteger {
 
 @interface MapViewController : UIViewController
 /** 保存经纬度信息 */
-@property (strong, nonatomic)NSMutableArray *locations;
+@property (strong, nonatomic)NSMutableArray<CLLocation *> *locations;
 /** 判断是定位还是，运动 */
 @property (nonatomic) MapViewType type;
 /** 用于peek上拉，保存peek的选项 */

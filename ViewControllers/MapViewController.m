@@ -103,7 +103,10 @@
      _locationManager = [DYLocationManager shareLocationManager];
     _locationManager.delegate = self;
     if (_type == MapViewTypeLocation) {
+        _locationManager.locationing = YES;
         [_locationManager startUpdatingLocation];
+    }else{
+        _locationManager.locationing = NO;
     }
 
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
@@ -206,7 +209,25 @@
         }
     }
     
-    
+//    CLLocationCoordinate2D pt = CLLocationCoordinate2DMake(_locations[0].coordinate.latitude, _locations[0].coordinate.longitude);
+//    ltX = pt.latitude, ltY = pt.longitude;
+//    rbX = pt.latitude, rbY = pt.longitude;
+//    for (int i = 1; i < polyLine.pointCount; i++) {
+//        CLLocationCoordinate2D pt = CLLocationCoordinate2DMake(_locations[i].coordinate.latitude, _locations[i].coordinate.longitude);
+//        if (pt.latitude < ltX) {
+//            ltX = pt.latitude;
+//        }
+//        if (pt.latitude > rbX) {
+//            rbX = pt.latitude;
+//        }
+//        if (pt.longitude > ltY) {
+//            ltY = pt.longitude;
+//        }
+//        if (pt.longitude < rbY) {
+//            rbY = pt.longitude;
+//        }
+//    }
+
     BMKMapRect rect;
     rect.origin = BMKMapPointMake(ltX , ltY);
     rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
@@ -214,8 +235,9 @@
     //[self.mapView setRegion: [self.mapView convertRect:[self.mapView convertMapRect:rect toRectToView:self.mapView] toRegionFromView:self.mapView]];
   //  BMKMapRect r1 = [self.mapView mapRectThatFits:rect];
     //[self.mapView setCenterCoordinate:CLLocationCoordinate2DMake( (rbX - ltX)/2.0,(rbY - ltY)/2.0) animated:YES];
-    //[self.mapView setRegion:BMKCoordinateRegionMake( CLLocationCoordinate2DMake( (rbY - ltY)/2.0,(rbX - ltX)/2.0), BMKCoordinateSpanMake(rect.size.width/2.0, rect.size.height/2.0))];
+    //[self.mapView setRegion:BMKCoordinateRegionMake( CLLocationCoordinate2DMake( (rbX - ltX)/2.0,(rbY - ltY)/2.0), BMKCoordinateSpanMake(rect.size.width/2.0, rect.size.height/2.0))];
     self.mapView.zoomLevel = self.mapView.zoomLevel - 1;
+    [self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
 }
 
 

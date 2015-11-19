@@ -40,6 +40,7 @@
 @property (nonatomic,getter=isRunning) BOOL running;
 /** 定位开始时间 */
 @property (nonatomic, strong) NSDate *startLocationDate;
+@property (nonatomic,getter=isLocationing) BOOL locationing;
 
 + (DYLocationManager *)shareLocationManager;
 /**

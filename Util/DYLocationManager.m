@@ -66,7 +66,7 @@ static BMKLocationService *locationService;
             } repeats:NO];
         });
        
-        if(_running)return;
+        if(!_locationing)return;
     }
 #warning test
     DDLogInfo(@"dingwei:纬度：%lf,经度：%lf",location.coordinate.latitude,location.coordinate.longitude);

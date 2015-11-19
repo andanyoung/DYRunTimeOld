@@ -49,7 +49,7 @@
         [self.contentView addSubview:_totalTimeLb];
         [_totalTimeLb mas_makeConstraints:^(MASConstraintMaker *make) {
             make.centerY.mas_equalTo(0);
-            make.right.mas_equalTo(-50);
+            make.right.mas_equalTo(0);
             
                   }];
 //        _totalTimeLb.frame = CGRectMake(0, 0, 59, 59);

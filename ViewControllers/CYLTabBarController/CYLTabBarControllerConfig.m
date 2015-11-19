@@ -29,11 +29,11 @@
 {
     if (_tabBarController == nil) {
         DYMainViewController *firstViewController = kVCFromSb(@"news", @"Main");
-        UIViewController *firstNavigationController = [[UINavigationController alloc]
+        UINavigationController *firstNavigationController = [[UINavigationController alloc]
                                                        initWithRootViewController:firstViewController];
         
         DYNewsViewController *secondViewController = kVCFromSb(@"main", @"Main");
-        UIViewController *secondNavigationController = [[UINavigationController alloc]
+        UINavigationController *secondNavigationController = [[UINavigationController alloc]
                                                         initWithRootViewController:secondViewController];
        
         CYLTabBarController *tabBarController = [[CYLTabBarController alloc] init];
@@ -85,7 +85,7 @@
 //                            CYLTabBarItemTitle : @"我的",
 //                            CYLTabBarItemImage : @"account_normal",
 //                            CYLTabBarItemSelectedImage : @"account_highlight"
-//                            };
+  //                          };
     NSArray *tabBarItemsAttributes = @[
                                        dict1,
                                        dict2

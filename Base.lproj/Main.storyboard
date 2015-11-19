@@ -5,25 +5,6 @@
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
-        <!--News View Controller-->
-        <scene sceneID="Vsn-1y-suL">
-            <objects>
-                <viewController storyboardIdentifier="news" id="KRP-a9-PMC" customClass="DYNewsViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="D63-sm-fVi"/>
-                        <viewControllerLayoutGuide type="bottom" id="s89-bA-78A"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="WF8-Zt-hFX">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <animations/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Gj5-Vr-E2R" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="271" y="-482"/>
-        </scene>
         <!--Main View Controller-->
         <scene sceneID="xez-J5-rWc">
             <objects>
@@ -54,7 +35,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sic-p5-wDf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="948" y="281"/>
+            <point key="canvasLocation" x="231" y="230"/>
         </scene>
         <!--Map View Controller-->
         <scene sceneID="tne-QT-ifu">
@@ -116,7 +97,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1713" y="275"/>
+            <point key="canvasLocation" x="1200" y="289"/>
         </scene>
     </scenes>
     <resources>

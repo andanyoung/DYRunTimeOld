@@ -28,6 +28,9 @@ BMKMapManager* _mapManager;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
   //  [DDLog addLogger:[DDASLLogger sharedInstance]];
+    
+
+    
     [DDLog addLogger:[DDTTYLogger sharedInstance]];
     
     [[DDTTYLogger sharedInstance] setColorsEnabled:YES];
@@ -41,7 +44,7 @@ BMKMapManager* _mapManager;
     self.window.frame = [UIScreen mainScreen].bounds;
     CYLTabBarControllerConfig *tabBarControllerConfig = [[CYLTabBarControllerConfig alloc] init];
     _tabBarController = tabBarControllerConfig.tabBarController;
-    _tabBarController.selectedIndex = 1;
+    _tabBarController.selectedIndex = 0;
     [self.window setRootViewController:_tabBarController];
     [self.window makeKeyAndVisible];
     [self customizeInterface];

@@ -24,7 +24,8 @@
 
 
 @property (nonatomic,strong) DYRecordView *tableHeaderView;
-//@property (nonatomic,weak) NSArray <CLLocation *> *locations;
+/** 每个界面的location */
+@property (nonatomic,weak) NSArray <CLLocation *> *locations;
 @property (nonatomic,strong) DYLocationManager *locationManager;
 @property (nonatomic, strong) NSMutableArray *allDates;
 
@@ -369,10 +370,11 @@ kRemoveCellSeparator
     MapViewController * mapVC = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
     mapVC.type = MapViewTypeQueryDetail;
     mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
+    _locations = mapVC.locations;
     if (mapVC.locations == nil || mapVC.locations.count < 2) {
 
         [self showErrorMsg:@"找不到相关信息"];
-        return nil;
+        //return nil;
         
     }
     //自定义peek大小
@@ -385,6 +387,8 @@ kRemoveCellSeparator
 
 
 - (void)previewingContext:(id<UIViewControllerPreviewing>)previewingContext commitViewController:(UIViewController *)viewControllerToCommit{
+//    mapVC.type = MapViewTypeQueryDetail;
+//    mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
     [self showDetailViewController:viewControllerToCommit sender:self];
 }
 
