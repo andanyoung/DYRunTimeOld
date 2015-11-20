@@ -63,6 +63,10 @@
 }
 
 - (NSArray *)imagextraWithIndexPath:(NSInteger)row{
-    return self.dataArr[row].imagextra;
+    NSArray *imgextraArr = self.dataArr[row].imgextra;
+    if (imgextraArr == nil) {
+        return nil;
+    }
+    return @[[NSURL URLWithString:imgextraArr[0]],[NSURL URLWithString:imgextraArr[1]]] ;
 }
 @end

@@ -19,9 +19,10 @@
             make.left.mas_equalTo(10);
             make.top.mas_equalTo(10);
             make.bottom.mas_equalTo(-10);
-            make.width.mas_equalTo(100);
+            make.width.mas_equalTo(107);
        
         }];
+        _iconIV.clipsToBounds = YES;
     }
     return _iconIV;
 }

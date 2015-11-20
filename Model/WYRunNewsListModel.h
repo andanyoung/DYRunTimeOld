@@ -26,7 +26,7 @@
 
 /** list中的描述 */
 @property (nonatomic, copy) NSString *digest;
-@property (nonatomic, strong) NSArray *imagextra;
+@property (nonatomic, strong) NSArray *imgextra;
 
 + (id)runNewsListModelWithArray:(id)responseObj;
 @end

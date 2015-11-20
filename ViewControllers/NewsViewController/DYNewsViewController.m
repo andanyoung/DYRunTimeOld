@@ -9,6 +9,7 @@
 #import "DYNewsViewController.h"
 #import "WYRunNewsListViewModel.h"
 #import "DYNewsCell.h"
+#import "DYNewsExtraImgCell.h"
 #import "NewsDetailViewController.h"
 
 #import <Masonry.h>
@@ -48,12 +49,11 @@
                     DDLogError(@"%@",error);
                 }else{
                     
-       dispatch_async(dispatch_get_main_queue(), ^{
-            [_tableView reloadData];
-       });
-                    
-           
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [_tableView reloadData];
+                    });
                 }
+                
                 [_tableView.mj_header endRefreshing];
                
             }];
@@ -65,9 +65,9 @@
                 if (error) {
                     DDLogError(@"%@",error);
                 }else{
-           // dispatch_async(dispatch_get_main_queue(), ^{
+            dispatch_async(dispatch_get_main_queue(), ^{
                     [_tableView reloadData];
-            //});
+            });
                 }
                 
                 [_tableView.mj_footer endRefreshing];
@@ -75,6 +75,8 @@
             }];
             
         }];
+        
+        [_tableView.mj_header beginRefreshing];
     }
     return _tableView;
 }
@@ -82,13 +84,16 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-    [self.tableView.mj_header beginRefreshing];
+    
 
     self.title = @"News";
 
-        [_tableView registerClass:[DYNewsCell class] forCellReuseIdentifier:@"newCell"];
-
-    _tableView.rowHeight = 100;
+    [self.tableView registerClass:[DYNewsCell class] forCellReuseIdentifier:@"newsCell"];
+    [self.tableView registerClass:[DYNewsExtraImgCell class] forCellReuseIdentifier:@"newsExtraCell"];
+    self.tableView.rowHeight = 100;
+    
+    self.tableView.backgroundColor = kRGBColor(240, 240, 24);
+    
 }
 
 #pragma mark - UITableViewDelegate
@@ -97,7 +102,18 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    DYNewsCell *cell = [tableView dequeueReusableCellWithIdentifier:@"newCell"];
+    if ([self.newsListVM imagextraWithIndexPath:indexPath.row]) {
+        DYNewsExtraImgCell *cell = [tableView dequeueReusableCellWithIdentifier:@"newsExtraCell"];
+        cell.titleLB.text = [self.newsListVM titleWithIndexPath:indexPath.row];
+        [cell.iconIV setImageWithURL:[self.newsListVM imgsrcURLWithIndexPath:indexPath.row] placeholderImage:[UIImage imageNamed:@"loading"]];
+        NSArray *imgextra = [self.newsListVM imagextraWithIndexPath:indexPath.row];
+        [cell.imgextra0 setImageWithURL:imgextra[0] placeholderImage:[UIImage imageNamed:@"loading"]];
+        [cell.imgextra1 setImageWithURL:imgextra[1] placeholderImage:[UIImage imageNamed:@"loading"]];
+        
+        return cell;
+    }
+    
+    DYNewsCell *cell = [tableView dequeueReusableCellWithIdentifier:@"newsCell"];
     [cell.iconIV setImageWithURL:[self.newsListVM imgsrcURLWithIndexPath:indexPath.row] placeholderImage:[UIImage imageNamed:@"loading"]];
     cell.titleLB.text = [self.newsListVM titleWithIndexPath:indexPath.row];
     cell.digestLB.text = [self.newsListVM digestWithIndexPath:indexPath.row];
@@ -109,8 +125,15 @@ kRemoveCellSeparator
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     NewsDetailViewController *newsDetailVC = [[NewsDetailViewController alloc]initWithURL:[self.newsListVM url_3wWithIndexPath:indexPath.row]];
-    self.tabBarController.hidesBottomBarWhenPushed = YES;
+    newsDetailVC.hidesBottomBarWhenPushed = YES;
     [self.navigationController pushViewController:newsDetailVC animated:YES];
 }
 
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    if ([self.newsListVM imagextraWithIndexPath:indexPath.row]) {
+        return 150;
+    }else{
+        return 100;
+    }
+}
 @end

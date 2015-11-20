@@ -8,7 +8,7 @@
 
 #import "NSObject+Common.h"
 
-#define kToastDuration     1
+#define kToastDuration     3
 
 @implementation NSObject (Common)
 

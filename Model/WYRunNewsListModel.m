@@ -30,11 +30,12 @@
         model.docid = dic[@"docid"];
         model.imgsrc = dic[@"imgsrc"];
         model.digest = dic[@"digest"];
-        if ([dic valueForKey:@"imagextra"]) {
-            model.imagextra = @[dic[@"imagextra"][0][@"imgsrc"],dic[@"imagextra"][1][@"imgsrc"]];
+        if ([dic valueForKey:@"imgextra"]) {
+            model.imgextra = @[dic[@"imgextra"][0][@"imgsrc"],dic[@"imgextra"][1][@"imgsrc"]];
         }
         [arr addObject:model];
     }
+    
     return arr;
         
 }

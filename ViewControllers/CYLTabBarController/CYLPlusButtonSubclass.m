@@ -7,6 +7,8 @@
 //
 
 #import "CYLPlusButtonSubclass.h"
+#import "DYLocationManager.h"
+
 @interface CYLPlusButtonSubclass () {
     CGFloat _buttonImageHeight;
 }
@@ -106,21 +108,21 @@
 
 - (void)clickPublish {
     UITabBarController *tabBarController = (UITabBarController *)self.window.rootViewController;
+    tabBarController.selectedIndex = 1;
     UIViewController *viewController = tabBarController.selectedViewController;
     
-    UIActionSheet *actionSheet = [[UIActionSheet alloc] initWithTitle:nil
-                                                             delegate:nil
-                                                    cancelButtonTitle:@"取消"
-                                               destructiveButtonTitle:nil
-                                                    otherButtonTitles:@"拍照", @"从相册选取", @"淘宝一键转卖", nil];
-    [actionSheet showInView:viewController.view];
+    DYLocationManager *locationManager = [DYLocationManager shareLocationManager];
+    
+    if (!locationManager.running) {
+        locationManager.delegate = ((UINavigationController *)viewController).viewControllers[0];
+        [locationManager startUpdatingLocation];
+    }else{
+        
+        [locationManager stopUpdatingLocation];
+        locationManager.delegate = nil;
+    }
 }
 
-#pragma mark - UIActionSheetDelegate
-
-- (void)actionSheet:(UIActionSheet *)actionSheet didDismissWithButtonIndex:(NSInteger)buttonIndex {
-    NSLog(@"buttonIndex = %@", @(buttonIndex));
-}
 
 #pragma mark - CYLPlusButtonSubclassing
 

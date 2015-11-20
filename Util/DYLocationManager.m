@@ -100,7 +100,6 @@ static BMKLocationService *locationService;
         return;//已经在定时
     }
     
-#warning 先试着用全局变量保存，看是不是可以在后台一直运行
     if (locationService == nil) {
         locationService = [BMKLocationService new];
         locationService.allowsBackgroundLocationUpdates = YES;

@@ -54,6 +54,7 @@
          */
         // [[self class] customizeTabBarAppearance];
         _tabBarController = tabBarController;
+        
     }
     return _tabBarController;
 }
