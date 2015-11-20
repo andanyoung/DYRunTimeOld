@@ -44,8 +44,9 @@ BMKMapManager* _mapManager;
     self.window.frame = [UIScreen mainScreen].bounds;
     CYLTabBarControllerConfig *tabBarControllerConfig = [[CYLTabBarControllerConfig alloc] init];
     _tabBarController = tabBarControllerConfig.tabBarController;
-    _tabBarController.selectedIndex = 0;
-    [self.window setRootViewController:_tabBarController];
+   
+    [self.window setRootViewController:tabBarControllerConfig.tabBarController];
+    
     [self.window makeKeyAndVisible];
     [self customizeInterface];
     

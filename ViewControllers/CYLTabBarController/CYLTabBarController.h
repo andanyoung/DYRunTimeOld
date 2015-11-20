@@ -6,7 +6,7 @@
 //  Copyright © 2015 https://github.com/ChenYilong . All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+
 
 static NSString *const CYLTabBarItemTitle= @"tabBarItemTitle";
 static NSString *const CYLTabBarItemImage= @"tabBarItemImage";

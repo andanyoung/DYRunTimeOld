@@ -105,15 +105,18 @@
                                          CGRectGetHeight(childView.frame)
                                          );
             //仅修改childView的x,ywh值不变
+
             childView.frame = CGRectMake(buttonIndex*tabBarButtonW,
                                          CGRectGetMinY(childView.frame),
                                          CGRectGetWidth(childView.frame),
                                          CGRectGetHeight(childView.frame)
                                          );
+        
+        DDLogVerbose(@"childView:%@",childView);
             buttonIndex++;
         }
     }
-    //bring the plus button to top
+    //bring the plus button to top 将指定的视图推送到前面
     [self bringSubviewToFront:self.plusButton];
 }
 

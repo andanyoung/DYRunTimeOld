@@ -9,8 +9,8 @@
 #import "CYLTabBarControllerConfig.h"
 
 //View Controllers
-#import "DYMainViewController.h"
 #import "DYNewsViewController.h"
+#import "DYMainViewController.h"
 
 @interface CYLTabBarControllerConfig ()
 
@@ -28,12 +28,12 @@
 - (CYLTabBarController *)tabBarController
 {
     if (_tabBarController == nil) {
-        DYMainViewController *firstViewController = kVCFromSb(@"news", @"Main");
-        UINavigationController *firstNavigationController = [[UINavigationController alloc]
+        DYNewsViewController *firstViewController = [[DYNewsViewController alloc] init];
+        UIViewController *firstNavigationController = [[UINavigationController alloc]
                                                        initWithRootViewController:firstViewController];
         
-        DYNewsViewController *secondViewController = kVCFromSb(@"main", @"Main");
-        UINavigationController *secondNavigationController = [[UINavigationController alloc]
+        DYMainViewController *secondViewController = kVCFromSb(@"main", @"Main");
+        UIViewController *secondNavigationController = [[UINavigationController alloc]
                                                         initWithRootViewController:secondViewController];
        
         CYLTabBarController *tabBarController = [[CYLTabBarController alloc] init];
@@ -48,7 +48,6 @@
         [tabBarController setViewControllers:@[
                                                firstNavigationController,
                                                secondNavigationController
-
                                                ]];
         /**
          *  更多TabBar自定义设置：比如：tabBarItem 的选中和不选中文字和背景图片属性、tabbar 背景图片属性
@@ -67,29 +66,20 @@
 - (void)setUpTabBarItemsAttributesForController:(CYLTabBarController *)tabBarController {
     
     NSDictionary *dict1 = @{
-                            CYLTabBarItemTitle : @"首页",
+                            CYLTabBarItemTitle : @"News",
                             CYLTabBarItemImage : @"home_normal",
-                            CYLTabBarItemSelectedImage : @"home_highlight",
+                            CYLTabBarItemSelectedImage : @"home_highlight"
                             };
     NSDictionary *dict2 = @{
-                            CYLTabBarItemTitle : @"同城",
+                            CYLTabBarItemTitle : @"RunTime",//这里的名字，要和控制器里的self.title名字一样,不然会初始化两个baritem
                             CYLTabBarItemImage : @"mycity_normal",
-                            CYLTabBarItemSelectedImage : @"mycity_highlight",
+                            CYLTabBarItemSelectedImage : @"mycity_highlight"
                             };
-//    NSDictionary *dict3 = @{
-//                            CYLTabBarItemTitle : @"消息",
-//                            CYLTabBarItemImage : @"message_normal",
-//                            CYLTabBarItemSelectedImage : @"message_highlight",
-//                            };
-//    NSDictionary *dict4 = @{
-//                            CYLTabBarItemTitle : @"我的",
-//                            CYLTabBarItemImage : @"account_normal",
-//                            CYLTabBarItemSelectedImage : @"account_highlight"
-  //                          };
+  
+    
     NSArray *tabBarItemsAttributes = @[
                                        dict1,
                                        dict2
-                                
                                        ];
     tabBarController.tabBarItemsAttributes = tabBarItemsAttributes;
 }

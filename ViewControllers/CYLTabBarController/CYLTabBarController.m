@@ -2,7 +2,7 @@
 //  CYLTabBarController.m
 //  CYLCustomTabBarDemo
 //
-//  Created by  (http://weibo.com/luohanchenyilong/) on 10/20/15.
+//  Created by 微博@iOS程序犭袁 (http://weibo.com/luohanchenyilong/) on 10/20/15.
 //  Copyright © 2015 https://github.com/ChenYilong . All rights reserved.
 //
 
@@ -10,8 +10,6 @@
 
 #import "CYLTabBar.h"
 #import <objc/runtime.h>
-
-#import "DYLocationManager.h"
 NSUInteger CYLTabbarItemsCount = 0;
 
 @interface UIViewController (CYLTabBarControllerItemInternal)
@@ -43,21 +41,6 @@ NSUInteger CYLTabbarItemsCount = 0;
  */
 - (void)setUpTabBar {
     [self setValue:[[CYLTabBar alloc] init] forKey:@"tabBar"];
-    
-    //为按钮添加事件
-    [CYLExternPushlishButton bk_addEventHandler:^(id sender) {
-        self.selectedIndex = 1;
-        DYLocationManager *locationManager = [DYLocationManager shareLocationManager];
-        if (!locationManager.running) {
-            locationManager.delegate = ((UINavigationController *)self.selectedViewController).viewControllers[0];
-            [locationManager startUpdatingLocation];
-          
-        }else{
-            [locationManager stopUpdatingLocation];
-            locationManager.delegate = nil;
-        }
-        
-    } forControlEvents:UIControlEventTouchUpInside];
 }
 
 - (void)setViewControllers:(NSArray *)viewControllers {
@@ -107,6 +90,7 @@ NSUInteger CYLTabbarItemsCount = 0;
                   normalImageName:(NSString *)normalImageName
                 selectedImageName:(NSString *)selectedImageName {
     
+   // viewController.title = title;
     viewController.tabBarItem.title         = title;
     UIImage *normalImage = [UIImage imageNamed:normalImageName];
     normalImage = [normalImage imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
