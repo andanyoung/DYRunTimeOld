@@ -65,9 +65,8 @@
                 if (error) {
                     DDLogError(@"%@",error);
                 }else{
-            dispatch_async(dispatch_get_main_queue(), ^{
                     [_tableView reloadData];
-            });
+       
                 }
                 
                 [_tableView.mj_footer endRefreshing];
@@ -90,10 +89,8 @@
 
     [self.tableView registerClass:[DYNewsCell class] forCellReuseIdentifier:@"newsCell"];
     [self.tableView registerClass:[DYNewsExtraImgCell class] forCellReuseIdentifier:@"newsExtraCell"];
-    self.tableView.rowHeight = 100;
-    
-    self.tableView.backgroundColor = kRGBColor(240, 240, 24);
-    
+    self.tableView.rowHeight = 80;
+    self.tableView.backgroundColor = kRGBColor(244, 244, 244);
 }
 
 #pragma mark - UITableViewDelegate
@@ -131,9 +128,9 @@ kRemoveCellSeparator
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
     if ([self.newsListVM imagextraWithIndexPath:indexPath.row]) {
-        return 150;
+        return 120;
     }else{
-        return 100;
+        return 80;
     }
 }
 @end

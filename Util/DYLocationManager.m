@@ -12,7 +12,7 @@
 #import <UIKit/UIKit.h>
 #import <BaiduMapAPI_Location/BMKLocationComponent.h>//引入定位功能所有的头文件
 
-
+#define minDistance 5
 static BMKLocationService *locationService;
 @interface DYLocationManager ()<BMKLocationServiceDelegate>
 
@@ -66,27 +66,31 @@ static BMKLocationService *locationService;
             } repeats:NO];
         });
        
-        if(!_locationing)return;
+        
     }
-#warning test
-    DDLogInfo(@"dingwei:纬度：%lf,经度：%lf",location.coordinate.latitude,location.coordinate.longitude);
     
-    if(self.locations.count>1){
+    if (_locationing) {
+        [self.locations replaceObjectAtIndex:0 withObject:location];
+    }else{
+
+        DDLogInfo(@"dingwei:纬度：%lf,经度：%lf",location.coordinate.latitude,location.coordinate.longitude);
         
-        
-        //计算本次定位数据与上一次定位之间的距离
-        CGFloat distance = [location distanceFromLocation:[self.locations lastObject]];
-        // (5.0米门限值，存储数组画线) 如果距离少于 5.0 米，则忽略本次数据直接返回方法
-        if (distance < 5.0) {
-            return;
+        if(self.locations.count>1){
+            
+            
+            //计算本次定位数据与上一次定位之间的距离
+            CGFloat distance = [location distanceFromLocation:[self.locations lastObject]];
+            // (5.0米门限值，存储数组画线) 如果距离少于 5.0 米，则忽略本次数据直接返回方法
+            if (distance < minDistance) {
+                return;
+            }
+            _totalDistanc += distance;
+            //  _timestamp = location.timestamp;
+            _speed = location.speed;
         }
-        _totalDistanc += distance;
-      //  _timestamp = location.timestamp;
-        _speed = location.speed;
+        
+        [self.locations addObject:location];
     }
-    [self.locations addObject:location];
-    
-    
     
     if([UIApplication sharedApplication].applicationState == UIApplicationStateActive){
         //程序处于前台
@@ -118,6 +122,9 @@ static BMKLocationService *locationService;
     [locationService startUserLocationService];
     _startLocationDate = [NSDate new]; 
 
+    if (_locationing) {
+        [self.locations addObject:[NSNull null]];
+    }
 }
 
 //- (void)suspendUpdatingLocation{

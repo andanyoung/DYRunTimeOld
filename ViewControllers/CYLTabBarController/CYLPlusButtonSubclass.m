@@ -116,6 +116,8 @@
     if (!locationManager.running) {
         locationManager.delegate = ((UINavigationController *)viewController).viewControllers[0];
         [locationManager startUpdatingLocation];
+        
+        [MobClick event:@"startRun"];
     }else{
         
         [locationManager stopUpdatingLocation];

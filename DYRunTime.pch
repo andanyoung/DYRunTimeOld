@@ -40,6 +40,7 @@
 #import <BlocksKit.h>
 //#import <BlocksKit+MessageUI.h>
 #import <BlocksKit+UIKit.h>
+#import "MobClick.h"
 //
 ////用于存放全局宏定义 或者 静态字符串
 #import "Constants.h"

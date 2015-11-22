@@ -112,7 +112,7 @@
                                          CGRectGetHeight(childView.frame)
                                          );
         
-        DDLogVerbose(@"childView:%@",childView);
+       // DDLogVerbose(@"childView:%@",childView);
             buttonIndex++;
         }
     }

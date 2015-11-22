@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import <CoreLocation/CoreLocation.h>
+#import "DYMainViewController.h"
 
 typedef enum : NSUInteger {
     /** 用于定位 */
@@ -25,5 +26,6 @@ typedef enum : NSUInteger {
 @property (nonatomic) MapViewType type;
 /** 用于peek上拉，保存peek的选项 */
 @property (nonatomic, weak) NSIndexPath *indexParh;
+@property (nonatomic, weak) DYMainViewController *mainVC;
 
 @end

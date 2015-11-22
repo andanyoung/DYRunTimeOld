@@ -28,6 +28,7 @@
         [self.dataArr removeAllObjects];
     }
     NSString *path = [NSString stringWithFormat:@"%@%ld-20.html",urlPath,_pageNumber];
+    DDLogInfo(@"url path:%@",path);
     self.task = [WYRunNewsListNetWork Get:path completeHandle:^(id model, NSError *error) {
         [self.dataArr addObjectsFromArray: model];
         complete(error);
@@ -63,6 +64,7 @@
 }
 
 - (NSArray *)imagextraWithIndexPath:(NSInteger)row{
+    if(self.dataArr.count == 0)return nil;
     NSArray *imgextraArr = self.dataArr[row].imgextra;
     if (imgextraArr == nil) {
         return nil;

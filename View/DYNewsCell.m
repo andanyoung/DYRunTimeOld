@@ -9,6 +9,9 @@
 #import "DYNewsCell.h"
 #import <Masonry.h>
 
+#define iconIVWidth 80
+
+
 @implementation DYNewsCell
 
 - (UIImageView *)iconIV {
@@ -19,7 +22,7 @@
             make.left.mas_equalTo(10);
             make.top.mas_equalTo(10);
             make.bottom.mas_equalTo(-10);
-            make.width.mas_equalTo(107);
+            make.width.mas_equalTo(iconIVWidth);
        
         }];
         _iconIV.clipsToBounds = YES;
@@ -48,7 +51,7 @@
         [_digestLB mas_makeConstraints:^(MASConstraintMaker *make) {
             make.right.mas_equalTo(-10);
             make.left.mas_equalTo(self.iconIV.mas_right).mas_equalTo(10);
-            make.top.mas_equalTo(self.titleLB.mas_bottom).mas_equalTo(10);
+            make.top.mas_equalTo(self.titleLB.mas_bottom).mas_equalTo(5);
         }];
         _digestLB.numberOfLines = 2;
         //_digestLB.font = [UIFont systemFontOfSize:12];
@@ -61,12 +64,11 @@
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
-        DDLogError(@"initCell:%@",[NSThread currentThread]);
-        
-          //  self.iconIV;
-        self.titleLB.font = [UIFont systemFontOfSize:18];
-        self.digestLB.font = [UIFont systemFontOfSize:15];
+       // DDLogError(@"initCell:%@",[NSThread currentThread]);
 
+        self.titleLB.font = [UIFont systemFontOfSize:16];
+        self.digestLB.font = [UIFont systemFontOfSize:15];
+        self.contentView.backgroundColor = kRGBColor(244, 244, 244);
     }
     return self;
 }

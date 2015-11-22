@@ -34,6 +34,7 @@
 - (void)showProgress{
     MBProgressHUD *progressHUD = [MBProgressHUD showHUDAddedTo:[self currentView] animated:YES];
     [progressHUD hide:YES afterDelay:kToastDuration];
+    //[MBProgressHUD showHUDAddedTo:[self currentView] animated:YES];
 }
 
 //隐藏提示

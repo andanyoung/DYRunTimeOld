@@ -8,13 +8,15 @@
 
 #import "AppDelegate.h"
 #import "DYLocationManager.h"
+#import "CYLTabBarControllerConfig.h"
+#import "MobClick.h"
 
-#define Key @"sy1uzDm5FzsX0yXW6CkUZarj"
 #import <BaiduMapAPI_Base/BMKBaseComponent.h>//引入base相关所有的头文件
 #import <BaiduMapAPI_Map/BMKMapComponent.h>//引入地图功能所有的头文件
 
-#import "CYLTabBarControllerConfig.h"
 
+#define UMengKey @"565169f167e58e49ba005813"
+#define BMKMApKey @"sy1uzDm5FzsX0yXW6CkUZarj"
 BMKMapManager* _mapManager;
 
 @interface AppDelegate ()
@@ -53,11 +55,14 @@ BMKMapManager* _mapManager;
     //先启动BaiduMapManager
     _mapManager = [[BMKMapManager alloc]init];
     //key
-    BOOL ret = [_mapManager start:Key generalDelegate:nil];
+    BOOL ret = [_mapManager start:BMKMApKey generalDelegate:nil];
     if (!ret) {
        
         DDLogError(@"manager start failed!");
     }
+    
+    //注册友盟统计
+    [MobClick startWithAppkey:UMengKey reportPolicy:BATCH channelId:nil];
     
     return YES;
 }

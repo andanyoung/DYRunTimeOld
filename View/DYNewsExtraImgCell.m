@@ -16,9 +16,9 @@
         _titleLB = [[UILabel alloc] init];
         [self.contentView addSubview:_titleLB];
         [_titleLB mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.top.mas_equalTo(10);
+            make.top.mas_equalTo(5);
             make.left.mas_equalTo(10);
-            make.height.greaterThanOrEqualTo(@50);
+            make.height.greaterThanOrEqualTo(@15);
         }];
     }
     return _titleLB;
@@ -31,7 +31,7 @@
         [_iconIV mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(self.titleLB.mas_bottom).mas_equalTo(10);
             make.left.mas_equalTo(10);
-            make.bottom.mas_equalTo(-10);
+            make.bottom.mas_equalTo(-5);
             //make.width.mas_equalTo(200);
         }];
         _iconIV.clipsToBounds = YES;
@@ -45,7 +45,7 @@
         [self.contentView addSubview:_imgextra0];
         [_imgextra0 mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(self.iconIV).mas_equalTo(0);
-            make.left.mas_equalTo(self.iconIV.mas_right).mas_equalTo(5);
+            make.left.mas_equalTo(self.iconIV.mas_right).mas_equalTo(2.5);
             make.width.mas_equalTo(self.iconIV);
             make.height.mas_equalTo(self.iconIV);
         }];
@@ -60,11 +60,13 @@
         [self.contentView addSubview:_imgextra1];
         [_imgextra1 mas_makeConstraints:^(MASConstraintMaker *make) {
             make.top.mas_equalTo(self.iconIV).mas_equalTo(0);
-            make.left.mas_equalTo(self.imgextra0.mas_right).mas_equalTo(5);
+            make.left.mas_equalTo(self.imgextra0.mas_right).mas_equalTo(2.5);
             make.width.mas_equalTo(self.iconIV);
             make.height.mas_equalTo(self.iconIV);
-            make.right.mas_equalTo(10);
+            make.right.mas_equalTo(-10);
         }];
+        
+        _imgextra1.clipsToBounds = YES;
     }
     return _imgextra1;
 }
@@ -72,7 +74,8 @@
 
 -(instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier{
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
-        self.titleLB.font = [UIFont systemFontOfSize:18];
+        self.titleLB.font = [UIFont systemFontOfSize:16];
+        self.contentView.backgroundColor = kRGBColor(244, 244, 244);
     }
     return self;
 }

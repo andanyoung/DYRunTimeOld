@@ -9,5 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface DYMainViewController : UITableViewController
-- (void) refreshDataForTableViewWith:(id)object withSection:(NSInteger)section;
+//- (void) refreshDataForTableViewWith:(id)object withSection:(NSInteger)section;
+/** 根据indexPath删除cell */
+- (void)tableView:(UITableView *)tableView deleteCellAtIndexPath:(NSIndexPath *)indexPath;
 @end

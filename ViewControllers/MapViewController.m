@@ -12,6 +12,7 @@
 #import "DYRunRecord.h"
 #import "DYFMDBManager.h"
 #import "DYMainViewController.h"
+#import "MobClick.h"
 
 #define polylineWith 10.0
 #define polylineColor [[UIColor greenColor] colorWithAlphaComponent:1]
@@ -40,9 +41,14 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
     [self showProgress];
-    //初始化定位
-    [self initLocation];
+
+    if (_type != MapViewTypeQueryDetail) {
+        [self startLocation];
+        //初始化定位
+        [self initLocation];
+    }
 }
 
 
@@ -51,15 +57,30 @@
     _mapView.delegate = self;
     
     [_mapView viewWillAppear];
-    if (_type != MapViewTypeQueryDetail) {
-       [self startLocation];
-    }
     
+    //peek 、Pop多会调用此方法，所以初始化轨迹应放这
+    if (  _type != MapViewTypeLocation && _locations.count>1 ) {
+        CLLocation *location = [_locations lastObject];
+        
+        [_mapView setCenterCoordinate:location.coordinate animated:YES];
+        
+        BMKUserLocation *userLocation = [BMKUserLocation new];
+        [userLocation setValue:location forKey:@"location"];
+        [userLocation setValue:@"YES" forKey:@"updating"];
+        [_mapView updateLocationData:userLocation];
+        [self drawWalkPolyline:_locations];
+        
+        [self mapViewFitPolyLine:_polyLine];
+    }
+
+    [MobClick beginLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
 }
 
 - (void)viewDidDisappear:(BOOL)animated{
     [super viewDidDisappear:animated];
     _mapView.delegate = nil;//不用时，值nil。释放内存
+    
+     [MobClick endLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
 }
 
 
@@ -81,20 +102,7 @@
     _mapView.zoomLevel = 20;
     _mapView.delegate = self;
     
-    if (  _type != MapViewTypeLocation && _locations.count>1 ) {
-        CLLocation *location = [_locations lastObject];
-        
-        [_mapView setCenterCoordinate:location.coordinate animated:YES];
-
-        BMKUserLocation *userLocation = [BMKUserLocation new];
-        [userLocation setValue:location forKey:@"location"];
-        [userLocation setValue:@"YES" forKey:@"updating"];
-        [_mapView updateLocationData:userLocation];
-        [self drawWalkPolyline:_locations];
-        
-        [self mapViewFitPolyLine:_polyLine];
-    }
-   
+    
 }
 
 /** 开始定位 */
@@ -209,35 +217,16 @@
         }
     }
     
-//    CLLocationCoordinate2D pt = CLLocationCoordinate2DMake(_locations[0].coordinate.latitude, _locations[0].coordinate.longitude);
-//    ltX = pt.latitude, ltY = pt.longitude;
-//    rbX = pt.latitude, rbY = pt.longitude;
-//    for (int i = 1; i < polyLine.pointCount; i++) {
-//        CLLocationCoordinate2D pt = CLLocationCoordinate2DMake(_locations[i].coordinate.latitude, _locations[i].coordinate.longitude);
-//        if (pt.latitude < ltX) {
-//            ltX = pt.latitude;
-//        }
-//        if (pt.latitude > rbX) {
-//            rbX = pt.latitude;
-//        }
-//        if (pt.longitude > ltY) {
-//            ltY = pt.longitude;
-//        }
-//        if (pt.longitude < rbY) {
-//            rbY = pt.longitude;
-//        }
-//    }
+
 
     BMKMapRect rect;
     rect.origin = BMKMapPointMake(ltX , ltY);
     rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
     [self.mapView setVisibleMapRect:rect];
-    //[self.mapView setRegion: [self.mapView convertRect:[self.mapView convertMapRect:rect toRectToView:self.mapView] toRegionFromView:self.mapView]];
-  //  BMKMapRect r1 = [self.mapView mapRectThatFits:rect];
-    //[self.mapView setCenterCoordinate:CLLocationCoordinate2DMake( (rbX - ltX)/2.0,(rbY - ltY)/2.0) animated:YES];
-    //[self.mapView setRegion:BMKCoordinateRegionMake( CLLocationCoordinate2DMake( (rbX - ltX)/2.0,(rbY - ltY)/2.0), BMKCoordinateSpanMake(rect.size.width/2.0, rect.size.height/2.0))];
-    self.mapView.zoomLevel = self.mapView.zoomLevel - 1;
-    [self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
+ 
+    self.mapView.zoomLevel = 19;
+   // [self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
+    
 }
 
 
@@ -321,25 +310,23 @@
 
 //底部预览界面选项
 - (NSArray<id<UIPreviewActionItem>> *)previewActionItems{
-    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"查看" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action,UIViewController  * _Nonnull previewViewController) {
-    
-    }];
+//    UIPreviewAction *action1 = [UIPreviewAction actionWithTitle:@"查看" style:UIPreviewActionStyleDefault handler:^(UIPreviewAction * _Nonnull action,UIViewController  * _Nonnull previewViewController) {
+//    //previewViewController 为当前视图(self)
+//        [_mainVC presentViewController:previewViewController animated:YES completion:nil];
+//    }];
     
     UIPreviewAction *action2 = [UIPreviewAction actionWithTitle:@"删除" style:UIPreviewActionStyleDestructive handler:^(UIPreviewAction * _Nonnull action, UIViewController * _Nonnull previewViewController) {
         
         [[UIAlertView bk_showAlertViewWithTitle:@"删除记录？" message:@"确定要删除此纪录吗？" cancelButtonTitle:@"点错了" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
             if (buttonIndex==1) {
-            
-//                if([DYFMDBManager deleteRecordsWithDate:[_locations[0] valueForKey:@"date"] andStartTime:[_locations[0] valueForKey:@"startTime"]]){
-//                    DYMainViewController *mainVC = (DYMainViewController *)previewViewController;
-//                   // mainVC refreshDataForTableViewWith:<#(id)#> withSection:NSIndexPath
-//                }
+               
+                [_mainVC tableView:_mainVC.tableView deleteCellAtIndexPath:_indexParh];
             }
         }] show];
     }];
 
 
-    return @[action1,action2];
+    return @[action2];
 }
 
 

@@ -322,21 +322,7 @@ kRemoveCellSeparator
             
             [[UIAlertView bk_showAlertViewWithTitle:@"删除记录？" message:@"确定要删除此纪录吗？" cancelButtonTitle:@"点错了" otherButtonTitles:@[@"确定"] handler:^(UIAlertView *alertView, NSInteger buttonIndex) {
                 if (buttonIndex==1) {
-                    NSArray *arr = self.allDates[indexPath.section];
-                    DYRunRecord *record = arr[indexPath.row];
-                    if([DYFMDBManager deleteRecordsWithDate:record.date andStartTime:record.startTime]){
-                        
-                        [self refreshDataForTableViewWith:record withSection:indexPath.section];
-                        if ([tableView numberOfRowsInSection:indexPath.section] == 1) {
-                            
-                            [tableView deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:rowAnimation];
-                        } else {
-                            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
-                        }
-                        
-                        [tableView endUpdates];
-
-                    }
+                    [self tableView:tableView deleteCellAtIndexPath:indexPath];
                 }else{
                     [self.tableView endEditing:YES];
                 }
@@ -346,7 +332,24 @@ kRemoveCellSeparator
     }
 }
 
+/** 根据indexPath删除cell */
+- (void)tableView:(UITableView *)tableView deleteCellAtIndexPath:(NSIndexPath *)indexPath{
+    NSArray *arr = self.allDates[indexPath.section];
+    DYRunRecord *record = arr[indexPath.row];
+    if([DYFMDBManager deleteRecordsWithDate:record.date andStartTime:record.startTime]){
+        
+        [self refreshDataForTableViewWith:record withSection:indexPath.section];
+        if ([tableView numberOfRowsInSection:indexPath.section] == 1) {
+            
+            [tableView deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section] withRowAnimation:rowAnimation];
+        } else {
+            [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        }
+        
+        [tableView endUpdates];
+    }
 
+}
 #pragma mark - previewing Delegate
 - (UIViewController *)previewingContext:(id<UIViewControllerPreviewing>)previewingContext viewControllerForLocation:(CGPoint)location{
     
@@ -371,6 +374,8 @@ kRemoveCellSeparator
     mapVC.type = MapViewTypeQueryDetail;
     mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
     _locations = mapVC.locations;
+    mapVC.indexParh = indexPath;
+    mapVC.mainVC = self;
     if (mapVC.locations == nil || mapVC.locations.count < 2) {
 
         [self showErrorMsg:@"找不到相关信息"];
@@ -387,8 +392,7 @@ kRemoveCellSeparator
 
 
 - (void)previewingContext:(id<UIViewControllerPreviewing>)previewingContext commitViewController:(UIViewController *)viewControllerToCommit{
-//    mapVC.type = MapViewTypeQueryDetail;
-//    mapVC.locations = [DYFMDBManager getLocationsWithDate:record.date andStartTime:record.startTime];
+
     [self showDetailViewController:viewControllerToCommit sender:self];
 }
 
