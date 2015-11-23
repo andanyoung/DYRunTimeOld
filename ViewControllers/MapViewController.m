@@ -61,6 +61,7 @@
     [_mapView viewWillAppear];
    
     _locationManager.delegate = self;
+    _mapView.zoomLevel = 20;
     //peek 、Pop多会调用此方法，所以初始化轨迹应放这
     if (  _type != MapViewTypeLocation && _locations.count>1 ) {
         CLLocation *location = [_locations lastObject];
@@ -80,7 +81,7 @@
             [self creatPointWithLocaiton:location title:@"终点"];
         }
     }
-
+    
     [MobClick beginLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
 }
 
@@ -135,7 +136,7 @@
 
 #pragma mark - BMKMapViewDelegate
 - (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
-    _mapView.zoomLevel = mapViewZoomLevel;
+    //_mapView.zoomLevel = mapViewZoomLevel;
     [self hideProgress];
 }
 
@@ -204,6 +205,12 @@
 
 
 - (void)mapViewFitPolyLine:(BMKPolyline *) polyLine {
+    
+    if (polyLine.pointCount < 20 ) {
+        self.mapView.zoomLevel = 20;
+        [self.mapView setCenterCoordinate:[_locations lastObject].coordinate animated:YES];
+        return;
+    }
     //一个矩形的四边
     /** ltx: top left x */
     CGFloat ltX, ltY, rbX, rbY;
@@ -233,13 +240,18 @@
     }
     
 
-
-    BMKMapRect rect;
-    rect.origin = BMKMapPointMake(ltX , ltY);
-    rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
-    [self.mapView setVisibleMapRect:rect animated:YES];
     
-    self.mapView.zoomLevel = mapViewZoomLevel -3;
+    BMKMapRect mapRect;
+    mapRect.origin = BMKMapPointMake(ltX , ltY);
+    mapRect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
+    [self.mapView setVisibleMapRect:mapRect animated:YES];
+
+    CGRect rect = [self.mapView convertMapRect:mapRect toRectToView:self.mapView];
+    BMKCoordinateRegion region = [self.mapView convertRect:rect toRegionFromView:self.mapView];
+    [self.mapView setRegion:region animated:YES];
+
+    
+  //  self.mapView.zoomLevel = mapViewZoomLevel -3;
     //[self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
     
 }
@@ -330,9 +342,6 @@
 
 
 - (IBAction)quitMap:(id)sender {
-//    if (!self.isRunning) {//不是run
-//        [_locationManager stopUpdatingLocation];
-//    }
     
     [self dismissModalViewControllerAnimated:YES];
     if ( _type == MapViewTypeRunning) return;

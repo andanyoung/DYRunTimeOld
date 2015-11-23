@@ -88,7 +88,7 @@
             [self.tableView beginUpdates];
             
             [self.tableView insertSections:indexSet withRowAnimation:rowAnimation];
-           // [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+  
             [self.tableView endUpdates];
         }
         
@@ -143,9 +143,7 @@
     if ([UIDevice currentDevice].systemVersion.doubleValue >= 9.0) {//适配9.0以下
         [self registerForPreviewingWithDelegate:self sourceView:self.tableView];
     }
-    
-    
-   
+  
 }
 
 
@@ -158,7 +156,7 @@
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
-    [DYLocationManager shareLocationManager].delegate = nil;
+    //[DYLocationManager shareLocationManager].delegate = nil;
     [super viewWillDisappear:animated];
     DDLogInfo(@"viewWillDisappear");
     //暂定定时器
@@ -223,8 +221,7 @@
 
 /** 当返回这个页面时，继续计时器 */
 - (void)continueTimer{
-    
-    
+
     if (_locationManager.running) {
         [_tableHeaderView.timer setFireDate:[NSDate distantPast]];//开启定时器
         NSDate *nowDate = [[NSDate alloc]init];
@@ -297,13 +294,19 @@ kRemoveCellSeparator
     return UITableViewAutomaticDimension;
 }
 
+//- (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section{
+//    UILabel *label = [UILabel new];
+//    label.frame = CGRectMake(0, 0, kWindowW, 20);
+//    label.text = [NSString stringWithFormat:@"%ld",section];
+//    return label;
+//}
+
+
+#pragma mark - tableViewEdit
 //某行是否支持编辑状态
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath{
     return YES;
 }
-
-
-#pragma mark - tableViewEdit
 
 // Allows customization of the editingStyle for a particular（详细的） cell located at 'indexPath'. If not implemented（执行）, all editable cells will have UITableViewCellEditingStyleDelete set for them when the table has editing property set to YES.
 //某行的编辑状态
