@@ -33,6 +33,7 @@
 @property (weak, nonatomic) IBOutlet BMKMapView *mapView;
 @property (nonatomic, strong) BMKPolyline *polyLine;
 @property (nonatomic, strong) DYLocationManager *locationManager;
+@property (nonatomic, strong) BMKPointAnnotation *startPoint;
 
 @end
 
@@ -44,11 +45,7 @@
     
     [self showProgress];
 
-    if (_type != MapViewTypeQueryDetail) {
-        [self startLocation];
-        //初始化定位
-        [self initLocation];
-    }
+   
 }
 
 
@@ -57,6 +54,12 @@
     _mapView.delegate = self;
     
     [_mapView viewWillAppear];
+    if (_type != MapViewTypeQueryDetail) {
+        //初始化定位
+        [self initLocation];
+        
+        [self startLocation];
+    }
     
     //peek 、Pop多会调用此方法，所以初始化轨迹应放这
     if (  _type != MapViewTypeLocation && _locations.count>1 ) {
@@ -112,10 +115,11 @@
     _locationManager.delegate = self;
     if (_type == MapViewTypeLocation) {
         _locationManager.locationing = YES;
-        [_locationManager startUpdatingLocation];
+        
     }else{
         _locationManager.locationing = NO;
     }
+    [_locationManager startUpdatingLocation];
 
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
@@ -163,6 +167,11 @@
     [locations enumerateObjectsUsingBlock:^(CLLocation *location, NSUInteger idx, BOOL * _Nonnull stop) {
         BMKMapPoint locationPoint = BMKMapPointForCoordinate(location.coordinate);
         tempPoints[idx] = locationPoint;
+        
+        // 放置起点旗帜
+        if (0 == idx  && self.startPoint == nil && _type != MapViewTypeLocation ) {
+            self.startPoint = [self creatPointWithLocaiton:location title:@"起点"];
+        }
     }];
     
     //移除原有的绘图，避免在原来轨迹上重画
@@ -247,6 +256,21 @@
 }
 
 /**
+ *  添加一个大头针
+ *
+ *  @param location
+ */
+- (BMKPointAnnotation *)creatPointWithLocaiton:(CLLocation *)location title:(NSString *)title;
+{
+    BMKPointAnnotation *point = [[BMKPointAnnotation alloc] init];
+    point.coordinate = location.coordinate;
+    point.title = title;
+    [self.mapView addAnnotation:point];
+    
+    return point;
+}
+
+/**
  *  只有在添加大头针的时候会调用，直接在viewDidload中不会调用
  *  根据anntation生成对应的View
  *  @param mapView 地图View
@@ -257,7 +281,7 @@
 {
     if ([annotation isKindOfClass:[BMKPointAnnotation class]]) {
         BMKPinAnnotationView *annotationView = [[BMKPinAnnotationView alloc]initWithAnnotation:annotation reuseIdentifier:@"myAnnotation"];
-        if(_locations.count == 1){ // 有起点旗帜代表应该放置终点旗帜（程序一个循环只放两张旗帜：起点与终点）
+        if(_startPoint ){ // 有起点旗帜代表应该放置终点旗帜（程序一个循环只放两张旗帜：起点与终点）
             annotationView.pinColor = BMKPinAnnotationColorGreen; // 替换资源包内的图片
            
         }else { // 没有起点旗帜，应放置起点旗帜
