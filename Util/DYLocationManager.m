@@ -70,7 +70,7 @@ static BMKLocationService *locationService;
     }
     
     if (_locationing) {
-     [self.locations replaceObjectAtIndex:0 withObject:location];
+     self.locations[0] = location;
     }else{
 
         DDLogInfo(@"dingwei:纬度：%lf,经度：%lf",location.coordinate.latitude,location.coordinate.longitude);

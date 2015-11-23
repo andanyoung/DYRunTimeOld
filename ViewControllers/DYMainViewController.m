@@ -126,7 +126,7 @@
     
     UIButton *button = [UIButton buttonWithType:UIButtonTypeSystem];
     [button setBackgroundImage:[UIImage imageNamed:@"activity_location"] forState:UIControlStateNormal];
-    button.frame = CGRectMake(0, 0, 28, 40);
+    button.frame = CGRectMake(0, 0, 22, 30);
     [button bk_addEventHandler:^(id sender) {
         
         MapViewController *mapVc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
@@ -194,11 +194,12 @@
                                                      name:UIApplicationDidEnterBackgroundNotification
                                                    object:app];
     }else{
+        [self showProgress];
         [self.tableHeaderView stopTimer];
         
         //保存记录
         DYRunRecord *record;
-        [self showProgress];
+        
         if (self.locationManager.locations.count < minSaveCount) {
             [self showErrorMsg:@"运动距离太短，保存失败"];
             [self.tableHeaderView resetRecord];

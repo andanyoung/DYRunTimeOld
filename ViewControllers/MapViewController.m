@@ -14,7 +14,7 @@
 #import "DYMainViewController.h"
 #import "MobClick.h"
 
-#define polylineWith 10.0
+#define polylineWidth 10.0
 #define polylineColor [[UIColor greenColor] colorWithAlphaComponent:1]
 #define mapViewZoomLevel 20
 #define removeObjectsLen 20
@@ -44,7 +44,12 @@
     [super viewDidLoad];
     
     [self showProgress];
-
+    if (_type != MapViewTypeQueryDetail) {
+        //初始化定位
+        [self initLocation];
+        
+        [self startLocation];
+    }
    
 }
 
@@ -54,19 +59,15 @@
     _mapView.delegate = self;
     
     [_mapView viewWillAppear];
-    if (_type != MapViewTypeQueryDetail) {
-        //初始化定位
-        [self initLocation];
-        
-        [self startLocation];
-    }
-    
+   
+    _locationManager.delegate = self;
     //peek 、Pop多会调用此方法，所以初始化轨迹应放这
     if (  _type != MapViewTypeLocation && _locations.count>1 ) {
         CLLocation *location = [_locations lastObject];
         
-        [_mapView setCenterCoordinate:location.coordinate animated:YES];
-        
+        //[_mapView setCenterCoordinate:location.coordinate animated:YES];
+        //下行：设置默认的地图中心。按上行设置时，当直接改变zoomLevel，是中心会改变
+        _mapView.centerCoordinate = location.coordinate;
         BMKUserLocation *userLocation = [BMKUserLocation new];
         [userLocation setValue:location forKey:@"location"];
         [userLocation setValue:@"YES" forKey:@"updating"];
@@ -74,6 +75,10 @@
         [self drawWalkPolyline:_locations];
         
         [self mapViewFitPolyLine:_polyLine];
+        
+        if (_type == MapViewTypeQueryDetail){
+            [self creatPointWithLocaiton:location title:@"终点"];
+        }
     }
 
     [MobClick beginLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
@@ -92,17 +97,18 @@
 - (void)initLocation{
     
     //配置_mapView 去除蓝色精度框
-    BMKLocationViewDisplayParam *displayParam = [BMKLocationViewDisplayParam new];
-    displayParam.isRotateAngleValid = true;//跟随态旋转角度是否生效
-    displayParam.isAccuracyCircleShow = false;//精度圈是否显示
-    displayParam.locationViewOffsetX = 0;//定位偏移量(经度)
-    displayParam.locationViewOffsetY = 0;//定位偏移量（纬度）
-    displayParam.locationViewImgName = @"walk";//定位图标名称
-    [_mapView updateLocationViewWithParam:displayParam];
-    
+    if (_type != MapViewTypeLocation) {
+        BMKLocationViewDisplayParam *displayParam = [BMKLocationViewDisplayParam new];
+        displayParam.isRotateAngleValid = true;//跟随态旋转角度是否生效
+        displayParam.isAccuracyCircleShow = false;//精度圈是否显示
+        displayParam.locationViewOffsetX = 0;//定位偏移量(经度)
+        displayParam.locationViewOffsetY = 0;//定位偏移量（纬度）
+        displayParam.locationViewImgName = @"walk";//定位图标名称
+        [_mapView updateLocationViewWithParam:displayParam];
+    }
     
     _mapView.showMapScaleBar = YES;
-    _mapView.zoomLevel = 20;
+    _mapView.zoomLevel = 3;
     _mapView.delegate = self;
     
     
@@ -129,6 +135,7 @@
 
 #pragma mark - BMKMapViewDelegate
 - (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
+    _mapView.zoomLevel = mapViewZoomLevel;
     [self hideProgress];
 }
 
@@ -136,22 +143,18 @@
 
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
     CLLocation *location = [locations lastObject];
-//    _mapView.zoomLevel = 20;
+   // _mapView.zoomLevel = mapViewZoomLevel;
     [_mapView setCenterCoordinate:location.coordinate animated:YES];
     BMKUserLocation *userLocation = [BMKUserLocation new];
     [userLocation setValue:location forKey:@"location"];
     [userLocation setValue:@"YES" forKey:@"updating"];
     [_mapView updateLocationData:userLocation];
     
-    if(_type == MapViewTypeLocation){
-        return;
+    if(_type != MapViewTypeLocation){
+        [self drawWalkPolyline:locations];
     }
-    [self drawWalkPolyline:locations];
-    
+   
 }
-
-
-
 
 #pragma mark -- 路径配置
 /**
@@ -210,6 +213,9 @@
     BMKMapPoint pt = polyLine.points[0];
     ltX = pt.x, ltY = pt.y;
     rbX = pt.x, rbY = pt.y;
+    
+    
+    
     for (int i = 1; i < polyLine.pointCount; i++) {
         BMKMapPoint pt = polyLine.points[i];
         if (pt.x < ltX) {
@@ -231,10 +237,10 @@
     BMKMapRect rect;
     rect.origin = BMKMapPointMake(ltX , ltY);
     rect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
-    [self.mapView setVisibleMapRect:rect];
- 
-    self.mapView.zoomLevel = 19;
-   // [self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
+    [self.mapView setVisibleMapRect:rect animated:YES];
+    
+    self.mapView.zoomLevel = mapViewZoomLevel -3;
+    //[self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
     
 }
 
@@ -245,7 +251,7 @@
     if ([overlay isKindOfClass:[BMKPolyline class]]){
         BMKPolylineView* polylineView = [[BMKPolylineView alloc] initWithOverlay:overlay];
         polylineView.strokeColor = polylineColor;
-        polylineView.lineWidth = polylineWith;
+        polylineView.lineWidth = polylineWidth;
        // polylineView.fillColor = [[UIColor clearColor] colorWithAlphaComponent:0.7];
         return polylineView;
     }
@@ -281,9 +287,11 @@
 {
     if ([annotation isKindOfClass:[BMKPointAnnotation class]]) {
         BMKPinAnnotationView *annotationView = [[BMKPinAnnotationView alloc]initWithAnnotation:annotation reuseIdentifier:@"myAnnotation"];
-        if(_startPoint ){ // 有起点旗帜代表应该放置终点旗帜（程序一个循环只放两张旗帜：起点与终点）
-            annotationView.pinColor = BMKPinAnnotationColorGreen; // 替换资源包内的图片
+        if([[annotation title] isEqualToString:@"起点"]){ // 有起点旗帜代表应该放置终点旗帜（程序一个循环只放两张旗帜：起点与终点）
+            annotationView.pinColor = BMKPinAnnotationColorGreen; // 替换资源包内的图片，作为起点
            
+        }else if([[annotation title] isEqualToString:@"终点"]){
+            annotationView.pinColor = BMKPinAnnotationColorRed;//终点的图标
         }else { // 没有起点旗帜，应放置起点旗帜
             annotationView.pinColor = BMKPinAnnotationColorPurple;
 
