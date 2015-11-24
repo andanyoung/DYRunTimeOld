@@ -36,12 +36,13 @@
 
 @property (nonatomic) double totalDistanc;
 @property (nonatomic) double speed;
-/** 是否是运动记录 */
-@property (nonatomic,getter=isRunning) BOOL running;
 /** 定位开始时间 */
 @property (nonatomic, strong) NSDate *startLocationDate;
-/** 是否是在定位 */
-@property (nonatomic,getter=isLocationing) BOOL locationing;
+/** 是否是运动记录 */
+@property (nonatomic,getter=isRunning) BOOL running;
+
+//用于显示当前的位子
+@property (nonatomic, strong) CLLocation *userLocation;
 
 + (DYLocationManager *)shareLocationManager;
 /**

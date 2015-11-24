@@ -25,16 +25,12 @@
 
 
 
-@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate,UIPreviewActionItem>{
-  //  BMKLocationService *_locaService;//由于系统原因，iOS不允许使用第三方定位，因此地图SDK中的定位方法，本质上是对原生定位的二次封装。
-}
-
+@interface MapViewController ()<BMKMapViewDelegate,DYLocationManagerDelegate,UIPreviewActionItem>
 //百度地图View
 @property (weak, nonatomic) IBOutlet BMKMapView *mapView;
 @property (nonatomic, strong) BMKPolyline *polyLine;
 @property (nonatomic, strong) DYLocationManager *locationManager;
-@property (nonatomic, strong) BMKPointAnnotation *startPoint;
-
+@property (nonatomic, assign) float zoomLevel;
 @end
 
 @implementation MapViewController
@@ -47,10 +43,9 @@
     if (_type != MapViewTypeQueryDetail) {
         //初始化定位
         [self initLocation];
-        
-        [self startLocation];
     }
-   
+   _mapView.zoomLevel = 20;
+    
 }
 
 
@@ -59,12 +54,14 @@
     _mapView.delegate = self;
     
     [_mapView viewWillAppear];
+    
    
     _locationManager.delegate = self;
-    _mapView.zoomLevel = 20;
-    //peek 、Pop多会调用此方法，所以初始化轨迹应放这
-    if (  _type != MapViewTypeLocation && _locations.count>1 ) {
+    //peek 、Pop都会调用此方法，所以初始化轨迹应放这
+    if (_type != MapViewTypeLocation && _locations.count>2) {
+        
         CLLocation *location = [_locations lastObject];
+        
         
         //[_mapView setCenterCoordinate:location.coordinate animated:YES];
         //下行：设置默认的地图中心。按上行设置时，当直接改变zoomLevel，是中心会改变
@@ -76,12 +73,18 @@
         [self drawWalkPolyline:_locations];
         
         [self mapViewFitPolyLine:_polyLine];
-        
+        if (_zoomLevel != 0) {
+            _mapView.zoomLevel = _zoomLevel;
+            return;
+        }
+        // 放置起点旗帜
+        [self creatPointWithLocaiton:[_locations firstObject] title:@"起点"];
         if (_type == MapViewTypeQueryDetail){
             [self creatPointWithLocaiton:location title:@"终点"];
         }
+        
     }
-    
+
     [MobClick beginLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
 }
 
@@ -109,42 +112,35 @@
     }
     
     _mapView.showMapScaleBar = YES;
-    _mapView.zoomLevel = 3;
     _mapView.delegate = self;
     
     
-}
-
-/** 开始定位 */
-- (void)startLocation{
-    
-     _locationManager = [DYLocationManager shareLocationManager];
+    /** 开始定位 */
+    _locationManager = [DYLocationManager shareLocationManager];
     _locationManager.delegate = self;
-    if (_type == MapViewTypeLocation) {
-        _locationManager.locationing = YES;
-        
-    }else{
-        _locationManager.locationing = NO;
-    }
+    
     [_locationManager startUpdatingLocation];
-
+    
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
     _mapView.showsUserLocation = YES;//显示定位图层,开始定位
+//    
+//    _mapView.centerCoordinate = _locationManager.userLocation.coordinate;
 }
-
 
 #pragma mark - BMKMapViewDelegate
 - (void)mapViewDidFinishLoading:(BMKMapView *)mapView{
-    //_mapView.zoomLevel = mapViewZoomLevel;
+ //先viewDidAppear ，在这个
+//    _mapView.zoomLevel = 20;
+//    _mapView.centerCoordinate = [_locations lastObject].coordinate;
     [self hideProgress];
 }
 
 #pragma mark -- DYLocationManagerDelegate
 
 - (void)locationManage:(DYLocationManager *)manager didUpdateLocations:(NSArray <CLLocation *>*)locations{
-    CLLocation *location = [locations lastObject];
-   // _mapView.zoomLevel = mapViewZoomLevel;
+
+    CLLocation *location = manager.userLocation;
     [_mapView setCenterCoordinate:location.coordinate animated:YES];
     BMKUserLocation *userLocation = [BMKUserLocation new];
     [userLocation setValue:location forKey:@"location"];
@@ -172,10 +168,7 @@
         BMKMapPoint locationPoint = BMKMapPointForCoordinate(location.coordinate);
         tempPoints[idx] = locationPoint;
         
-        // 放置起点旗帜
-        if (0 == idx  && self.startPoint == nil && _type != MapViewTypeLocation ) {
-            self.startPoint = [self creatPointWithLocaiton:location title:@"起点"];
-        }
+        
     }];
     
     //移除原有的绘图，避免在原来轨迹上重画
@@ -211,6 +204,7 @@
         [self.mapView setCenterCoordinate:[_locations lastObject].coordinate animated:YES];
         return;
     }
+
     //一个矩形的四边
     /** ltx: top left x */
     CGFloat ltX, ltY, rbX, rbY;
@@ -220,9 +214,7 @@
     BMKMapPoint pt = polyLine.points[0];
     ltX = pt.x, ltY = pt.y;
     rbX = pt.x, rbY = pt.y;
-    
-    
-    
+
     for (int i = 1; i < polyLine.pointCount; i++) {
         BMKMapPoint pt = polyLine.points[i];
         if (pt.x < ltX) {
@@ -244,15 +236,17 @@
     BMKMapRect mapRect;
     mapRect.origin = BMKMapPointMake(ltX , ltY);
     mapRect.size = BMKMapSizeMake(rbX - ltX, rbY - ltY);
-    [self.mapView setVisibleMapRect:mapRect animated:YES];
-
-    CGRect rect = [self.mapView convertMapRect:mapRect toRectToView:self.mapView];
-    BMKCoordinateRegion region = [self.mapView convertRect:rect toRegionFromView:self.mapView];
-    [self.mapView setRegion:region animated:YES];
-
+    [self.mapView setVisibleMapRect:mapRect ];
     
-  //  self.mapView.zoomLevel = mapViewZoomLevel -3;
-    //[self.mapView setCenterCoordinate:[_locations firstObject].coordinate animated:YES];
+    if (_zoomLevel == 0) {
+        //设置两次（SetRegion）会使zoolLevel改变？
+        CGRect rect = [self.mapView convertMapRect:mapRect toRectToView:self.mapView];
+        BMKCoordinateRegion region = [self.mapView convertRect:rect toRegionFromView:self.mapView];
+        
+        [self.mapView setRegion:region animated:YES];
+        
+        _zoomLevel = _mapView.zoomLevel;
+    }
     
 }
 
@@ -329,9 +323,6 @@
     DDLogInfo(@"start locate");
 }
 
-
-
-
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     
@@ -339,7 +330,6 @@
     NSRange range = NSMakeRange(0, removeObjectsLen);
     [_locationManager.locations removeObjectsInRange:range];
 }
-
 
 - (IBAction)quitMap:(id)sender {
     
@@ -369,6 +359,7 @@
 
     return @[action2];
 }
+
 
 
 @end

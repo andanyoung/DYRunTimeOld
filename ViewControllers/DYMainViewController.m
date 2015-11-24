@@ -15,7 +15,7 @@
 #import "DYRunRecordCell.h"
 #import <Masonry.h>
 
-#define minSaveCount  2
+#define minSaveCount  3
 #define removeObjectsLen 20
 #define tableHeaderViewHeight 250
 #define rowAnimation UITableViewRowAnimationAutomatic
@@ -130,10 +130,9 @@
     [button bk_addEventHandler:^(id sender) {
         
         MapViewController *mapVc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil]instantiateViewControllerWithIdentifier:@"map"];
-
-            mapVc.locations = [NSMutableArray arrayWithArray:self.locationManager.locations];
-            mapVc.type = self.locationManager.running;
         
+        mapVc.locations = [NSMutableArray arrayWithArray:self.locationManager.locations];
+        mapVc.type = self.locationManager.running;
         [self presentViewController:mapVc animated:YES completion:nil];
         
     } forControlEvents:UIControlEventTouchUpInside];
@@ -339,7 +338,7 @@ kRemoveCellSeparator
 /** 根据indexPath删除cell */
 - (void)tableView:(UITableView *)tableView deleteCellAtIndexPath:(NSIndexPath *)indexPath{
     NSArray *arr = self.allDates[indexPath.section];
-    DYRunRecord *record = arr[indexPath.row];
+    DYRunRecord *record = arr[arr.count - indexPath.row - 1];
     if([DYFMDBManager deleteRecordsWithDate:record.date andStartTime:record.startTime]){
         
         [self refreshDataForTableViewWith:record withSection:indexPath.section];
