@@ -31,6 +31,7 @@
 @property (nonatomic, strong) BMKPolyline *polyLine;
 @property (nonatomic, strong) DYLocationManager *locationManager;
 @property (nonatomic, assign) float zoomLevel;
+@property (nonatomic, weak) BMKPointAnnotation *startAnnotation;
 @end
 
 @implementation MapViewController
@@ -38,14 +39,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     [self showProgress];
-    if (_type != MapViewTypeQueryDetail) {
         //初始化定位
-        [self initLocation];
-    }
-   _mapView.zoomLevel = 20;
-    
+    [self initLocation];
+
 }
 
 
@@ -54,8 +51,7 @@
     _mapView.delegate = self;
     
     [_mapView viewWillAppear];
-    
-   
+
     _locationManager.delegate = self;
     //peek 、Pop都会调用此方法，所以初始化轨迹应放这
     if (_type != MapViewTypeLocation && _locations.count>2) {
@@ -73,16 +69,15 @@
         [self drawWalkPolyline:_locations];
         
         [self mapViewFitPolyLine:_polyLine];
+        
+        if (_type == MapViewTypeQueryDetail) {
+       
+            [self creatPointWithLocaiton:[_locations lastObject] title:@"终点"];
+        }
         if (_zoomLevel != 0) {
             _mapView.zoomLevel = _zoomLevel;
             return;
         }
-        // 放置起点旗帜
-        [self creatPointWithLocaiton:[_locations firstObject] title:@"起点"];
-        if (_type == MapViewTypeQueryDetail){
-            [self creatPointWithLocaiton:location title:@"终点"];
-        }
-        
     }
 
     [MobClick beginLogPageView:[NSString stringWithFormat:@"MapView_type_%ld",_type]];
@@ -99,9 +94,11 @@
 
 #pragma mark -- 初始化地图
 - (void)initLocation{
-    
+    if (_type == MapViewTypeQueryDetail) {
+        return;
+    }
     //配置_mapView 去除蓝色精度框
-    if (_type != MapViewTypeLocation) {
+    if (_type == MapViewTypeRunning) {
         BMKLocationViewDisplayParam *displayParam = [BMKLocationViewDisplayParam new];
         displayParam.isRotateAngleValid = true;//跟随态旋转角度是否生效
         displayParam.isAccuracyCircleShow = false;//精度圈是否显示
@@ -109,11 +106,12 @@
         displayParam.locationViewOffsetY = 0;//定位偏移量（纬度）
         displayParam.locationViewImgName = @"walk";//定位图标名称
         [_mapView updateLocationViewWithParam:displayParam];
+
     }
     
     _mapView.showMapScaleBar = YES;
     _mapView.delegate = self;
-    
+    _mapView.zoomLevel = mapViewZoomLevel;
     
     /** 开始定位 */
     _locationManager = [DYLocationManager shareLocationManager];
@@ -124,8 +122,6 @@
     _mapView.showsUserLocation = NO;//先关闭显示的定位图层
     _mapView.userTrackingMode = BMKUserTrackingModeNone;// 定位罗盘模式
     _mapView.showsUserLocation = YES;//显示定位图层,开始定位
-//    
-//    _mapView.centerCoordinate = _locationManager.userLocation.coordinate;
 }
 
 #pragma mark - BMKMapViewDelegate
@@ -171,6 +167,11 @@
         
     }];
     
+    // 放置起点旗帜
+    if (!_startAnnotation) {
+        _startAnnotation = [self creatPointWithLocaiton:[_locations firstObject] title:@"起点"];
+    }
+
     //移除原有的绘图，避免在原来轨迹上重画
     if (self.polyLine) {
         [self.mapView removeOverlay:self.polyLine];
@@ -239,10 +240,13 @@
     [self.mapView setVisibleMapRect:mapRect ];
     
     if (_zoomLevel == 0) {
-        //设置两次（SetRegion）会使zoolLevel改变？
+        //设置两次（setRegion）会使zoolLevel改变？ pop进来会两次进入Viewdidappear，
         CGRect rect = [self.mapView convertMapRect:mapRect toRectToView:self.mapView];
         BMKCoordinateRegion region = [self.mapView convertRect:rect toRegionFromView:self.mapView];
-        
+        BMKCoordinateSpan tempSpan = region.span;
+        tempSpan.latitudeDelta *= 1.1;
+        tempSpan.longitudeDelta *= 1.1;
+        region.span = tempSpan;
         [self.mapView setRegion:region animated:YES];
         
         _zoomLevel = _mapView.zoomLevel;
